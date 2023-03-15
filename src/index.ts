@@ -29,8 +29,8 @@ class Matchmaker {
         }
         this.authSigner = authSigner
         this.network = network
-        this.bundleUrl = Object.entries(bundleApiUrls).find(kv => kv[0] === network.name)?.[1]
-        this.streamUrl = Object.entries(streamingUrls).find(kv => kv[0] === network.name)?.[1]
+        this.bundleUrl = Object.entries(bundleApiUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
+        this.streamUrl = Object.entries(streamingUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
     }
 
     private async handleBundleApiRequest({ headers, body }: { headers: any, body: any}) {

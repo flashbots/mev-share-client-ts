@@ -6,7 +6,15 @@ Based on [prospective API docs](https://flashbots.notion.site/PUBLIC-Prospective
 
 ## quickstart
 
-Clone the library & build from source:
+Install from npm:
+
+```sh
+yarn add @flashbots/matchmaker-ts
+# or
+npm i @flashbots/matchmaker-ts
+```
+
+Alternatively, clone the library & build from source:
 
 ```sh
 git clone https://github.com/flashbots/matchmaker-ts
@@ -14,7 +22,20 @@ cd matchmaker-ts
 yarn install && yarn build
 ```
 
-> will be available on npm in the future :)
+### use matchmaker in your project
+
+> :warning: Variables denoted in `ALL_CAPS` are placeholders; the code does not compile. [examples/](#examples) contains compilable demos.
+
+In your project:
+
+```typescript
+import { Wallet, JsonRpcProvider } from "ethers"
+import Matchmaker, { ShareBundleParams, PendingShareTransaction, ShareTransactionOptions } from "@flashbots/matchmaker-ts"
+
+const provider = new JsonRpcProvider(GOERLI_RPC_URL)
+const authSigner = new Wallet(FB_REPUTATION_PRIVATE_KEY, provider)
+const matchmaker = new Matchmaker(authSigner, {chainId: 5, name: "goerli"})
+```
 
 ### examples
 
@@ -42,28 +63,6 @@ This example watches the mev-share streaming endpoint for pending mev-share tran
 
 ```sh
 yarn example.backrun
-```
-
-### use matchmaker in your project
-
-> :warning: Variables denoted in `ALL_CAPS` are placeholders; the code does not compile. [examples/](#examples) contains compilable demos.
-
-_in your project directory (ensure you've [cloned and built source](#quickstart)):_
-
-```sh
-# assuming your project shares a parent directory with `matchmaker-ts/`
-yarn add ../matchmaker-ts
-```
-
-In your project:
-
-```typescript
-import { Wallet, JsonRpcProvider } from "ethers"
-import Matchmaker, { ShareBundleParams, PendingShareTransaction, ShareTransactionOptions } from "matchmaker-ts"
-
-const provider = new JsonRpcProvider(GOERLI_RPC_URL)
-const authSigner = new Wallet(FB_REPUTATION_PRIVATE_KEY, provider)
-const matchmaker = new Matchmaker(authSigner, {chainId: 5, name: "goerli"})
 ```
 
 ## API
