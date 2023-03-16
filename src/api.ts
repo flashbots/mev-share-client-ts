@@ -34,8 +34,8 @@ export interface ShareBundleParams {
     version?: number, // smart bundle spec version
     replacementUuid?: string, // uuidv4
     targetBlock: number, // bundle will be assumed correct only for targetBlockNumber or until cancelled
-    backruns: string[][], // array of bundles of signed txs; [["0x...", "0x..."], ["0x...", "0x..."]]
-    shareTxs: string[] // tx hashes; bundle of mev-share txs for the backrun to follow
+    backrun: string[], // array of signed txs
+    shareTxs: string[] // array of mev-share tx hashes for the backrun to follow (currently only one tx hash is supported)
 }
 
 /**
@@ -89,10 +89,7 @@ export function mungePrivateTxParams(signedTx: string, options?: ShareTransactio
 
 export function mungeShareBundleParams(params: ShareBundleParams) {
     return [{
-        version: params.version,
-        replacementUuid: params.replacementUuid,
+        ...params,
         targetBlock: `0x${params.targetBlock.toString(16)}`,
-        backruns: params.backruns,
-        shareTxs: params.shareTxs,
     }]
 }

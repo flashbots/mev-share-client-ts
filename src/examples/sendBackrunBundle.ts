@@ -19,16 +19,14 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
         ...tx,
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
     }
-    const backruns = [
-        [await wallet.signTransaction(tx)]
-    ]
+    const backrun = [await wallet.signTransaction(tx)]
     const shareTxs = [pendingTx.txHash]
     let backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
     for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
         const params: ShareBundleParams = {
             targetBlock: targetBlock + i,
-            backruns,
+            backrun,
             shareTxs,
         }
         const backrunRes = matchmaker.sendShareBundle(params)
@@ -36,7 +34,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
         backrunResults.push(backrunRes)
     }
     return {
-        backruns,
+        backrun,
         backrunResults: await Promise.all(backrunResults),
     }
 }
@@ -50,7 +48,7 @@ const handleBackrun = async (
 ) => {
     console.log("pending tx", pendingTx)
     let targetBlock = await provider.getBlockNumber() + 2
-    let { backruns, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    let { backrun, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
     console.log("backrun results", backrunResults)
 
     // watch future blocks for backrun tx inclusion
@@ -66,7 +64,7 @@ const handleBackrun = async (
         }
 
         // check for inclusion of backrun tx in target block
-        const backrunTxHash = keccak256(backruns[0][0])
+        const backrunTxHash = keccak256(backrun[0])
         const receipt = await provider.getTransactionReceipt(backrunTxHash)
         if (receipt?.status === 1) {
             console.log("backrun tx included!")

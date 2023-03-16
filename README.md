@@ -97,13 +97,13 @@ await matchmaker.sendShareTransaction(SIGNED_TX, shareTxParams)
 
 ### `sendShareBundle`
 
-Sends an array of bundles, each of which try to backrun a pending mev-share transaction. Currently only one share transaction is supported.
+Sends a bundle; an array of transactions; which tries to backrun a pending mev-share transaction. Currently only one share transaction in `shareTxs` is supported.
 
 ```typescript
 const bundleParams: ShareBundleParams = {
     targetBlock: TARGET_BLOCK,
     shareTxs: [PENDING_TX_HASH],
-    backruns: [[SIGNED_BACKRUN_TX1, SIGNED_BACKRUN_TX2], ...],
+    backrun: [SIGNED_BACKRUN_TX1, SIGNED_BACKRUN_TX2],
 }
 await matchmaker.sendShareBundle(bundleParams)
 ```
