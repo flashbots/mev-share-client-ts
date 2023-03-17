@@ -15,7 +15,7 @@ const streamingUrls = {
 }
 
 class Matchmaker {
-    private bundleUrl?: string
+    private apiUrl?: string
     private streamUrl?: string
     constructor(
         private authSigner: Wallet,
@@ -23,20 +23,24 @@ class Matchmaker {
             chainId: number,
             name: string,
         },
+        mevShareOptions?: {
+            apiUrl?: string,
+            streamUrl?: string,
+        }
     ) {
         if (network.chainId !== 5) {
             throw new UnimplementedNetwork(network)
         }
         this.authSigner = authSigner
         this.network = network
-        this.bundleUrl = Object.entries(bundleApiUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
-        this.streamUrl = Object.entries(streamingUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
+        this.apiUrl = mevShareOptions?.apiUrl || Object.entries(bundleApiUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
+        this.streamUrl = mevShareOptions?.streamUrl || Object.entries(streamingUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
     }
 
     private async handleBundleApiRequest({ headers, body }: { headers: any, body: any}) {
-        if (!this.bundleUrl) throw new UnimplementedNetwork(this.network)
+        if (!this.apiUrl) throw new UnimplementedNetwork(this.network)
         try {
-            const res = await axios.post(this.bundleUrl, body, {
+            const res = await axios.post(this.apiUrl, body, {
                 headers
             })
             return (res.data as JsonRpcData).result
@@ -50,8 +54,10 @@ class Matchmaker {
      * Registers the provided callback to be called when a new mev-share transaction is received.
      * @param callback Async function to process pending tx.
      * @returns Event listener, which can be used to close the connection.
+     *
+     * @deprecated Use {@link onShareTransaction} instead.
      */
-    public listenForShareTransactions(callback: (data: PendingShareTransaction) => Promise<any>) {
+    public listenForShareTransactions(callback: (data: PendingShareTransaction) => Promise<EventSource>) {
         if (!this.streamUrl) throw new UnimplementedNetwork(this.network)
         const events = new EventSource(this.streamUrl)
         events.onmessage = (event) => {
@@ -62,6 +68,15 @@ class Matchmaker {
             }
         }
         return events
+    }
+
+    /**
+     * Registers the provided callback to be called when a new mev-share transaction is received.
+     * @param callback Async function to process pending tx.
+     * @returns Event listener, which can be used to close the connection.
+     */
+    public onShareTransaction(callback: (data: PendingShareTransaction) => Promise<EventSource>) {
+        return this.listenForShareTransactions(callback)
     }
 
     /** Sends a private transaction with MEV hints to mev-share.
