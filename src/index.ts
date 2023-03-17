@@ -15,7 +15,7 @@ const streamingUrls = {
 }
 
 class Matchmaker {
-    private bundleUrl?: string
+    private apiUrl?: string
     private streamUrl?: string
     constructor(
         private authSigner: Wallet,
@@ -23,20 +23,24 @@ class Matchmaker {
             chainId: number,
             name: string,
         },
+        mevShareOptions?: {
+            apiUrl?: string,
+            streamUrl?: string,
+        }
     ) {
         if (network.chainId !== 5) {
             throw new UnimplementedNetwork(network)
         }
         this.authSigner = authSigner
         this.network = network
-        this.bundleUrl = Object.entries(bundleApiUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
-        this.streamUrl = Object.entries(streamingUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
+        this.apiUrl = mevShareOptions?.apiUrl || Object.entries(bundleApiUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
+        this.streamUrl = mevShareOptions?.streamUrl || Object.entries(streamingUrls).find(kv => kv[0] === network.name.toLowerCase())?.[1]
     }
 
     private async handleBundleApiRequest({ headers, body }: { headers: any, body: any}) {
-        if (!this.bundleUrl) throw new UnimplementedNetwork(this.network)
+        if (!this.apiUrl) throw new UnimplementedNetwork(this.network)
         try {
-            const res = await axios.post(this.bundleUrl, body, {
+            const res = await axios.post(this.apiUrl, body, {
                 headers
             })
             return (res.data as JsonRpcData).result
