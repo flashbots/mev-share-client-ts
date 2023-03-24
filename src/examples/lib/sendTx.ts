@@ -5,7 +5,7 @@ import { initExample } from './helpers'
 
 export const setupTxExample = async (provider: JsonRpcProvider, tip?: BigInt, flair?: string) => {
     const { wallet, feeData, matchmaker } = await initExample(provider)
-    const tipActual = tip ? toBigInt(tip.toString()) : toBigInt(0)
+    const tipActual = tip ? tip.valueOf() : BigInt(0)
     const tx: TransactionRequest = {
         type: 2,
         chainId: provider._network.chainId,
@@ -14,7 +14,7 @@ export const setupTxExample = async (provider: JsonRpcProvider, tip?: BigInt, fl
         value: 0,
         gasLimit: 22000,
         data: hexlify(toUtf8Bytes(flair || "im shariiiiiing")),
-        maxFeePerGas: (feeData.maxFeePerGas || BigInt(42)) + tipActual,
+        maxFeePerGas: toBigInt(feeData.maxFeePerGas || 42) + tipActual,
         maxPriorityFeePerGas: toBigInt(feeData.maxPriorityFeePerGas || 2) + tipActual,
     }
 
