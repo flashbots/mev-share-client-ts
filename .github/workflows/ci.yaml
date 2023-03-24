@@ -1,0 +1,13 @@
+steps:
+- uses: actions/checkout@v3
+- name: Read .nvmrc
+  run: echo "##[set-output name=NODE_VERSION;]$(cat .nvmrc)"
+  id: nvmrc
+- name: Use Node.js (.nvmrc)
+  uses: actions/setup-node@v3
+  with:
+    node-version: "${{ steps.nvmrc.outputs.NODE_VERSION }}"
+- name: Install dependencies
+  run: yarn install
+- name: Build package
+  run: yarn build
