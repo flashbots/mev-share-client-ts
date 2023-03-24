@@ -14,7 +14,10 @@
   "devDependencies": {
     "@types/eventsource": "^1.1.11",
     "@types/node": "^18.14.4",
+    "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@typescript-eslint/parser": "^5.56.0",
     "dotenv": "^16.0.3",
+    "eslint": "^8.36.0",
     "ethers": "^6.1.0",
     "release-it": "^15.8.0",
     "ts-node": "^10.9.1",
@@ -25,7 +28,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"no test specified\" && exit 0",
+    "lint": "eslint src/*.ts src/**/*.ts",
     "example.tx": "ts-node src/examples/sendTx.ts",
     "example.backrun": "ts-node src/examples/sendBackrunBundle.ts"
   }

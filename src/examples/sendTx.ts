@@ -4,7 +4,7 @@ import { sendTx } from './lib/sendTx'
 
 const main = async () => {
     const provider = getProvider()
-    let hints: HintPreferences = {
+    const hints: HintPreferences = {
         calldata: true,
         logs: true,
         contractAddress: true,

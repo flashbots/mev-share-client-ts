@@ -22,3 +22,5 @@ jobs:
         run: yarn install
       - name: Build package
         run: yarn build
+      - name: Lint source code
+        run: yarn lint
