@@ -90,7 +90,7 @@ const main = async () => {
     const pendingMutex = new Mutex()
     
     // listen for txs
-    const txHandler = matchmaker.listenForShareTransactions(pendingTx => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
+    const txHandler = matchmaker.onShareTransaction(pendingTx => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
     console.log("listening for transactions...")
 
     await pendingMutex.acquire()

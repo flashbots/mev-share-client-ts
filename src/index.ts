@@ -57,7 +57,7 @@ class Matchmaker {
      *
      * @deprecated Use {@link onShareTransaction} instead.
      */
-    public listenForShareTransactions(callback: (data: PendingShareTransaction) => Promise<EventSource>) {
+    public listenForShareTransactions(callback: (data: PendingShareTransaction) => void): EventSource {
         if (!this.streamUrl) throw new UnimplementedNetwork(this.network)
         const events = new EventSource(this.streamUrl)
         events.onmessage = (event) => {
@@ -75,7 +75,7 @@ class Matchmaker {
      * @param callback Async function to process pending tx.
      * @returns Event listener, which can be used to close the connection.
      */
-    public onShareTransaction(callback: (data: PendingShareTransaction) => Promise<EventSource>) {
+    public onShareTransaction(callback: (data: PendingShareTransaction) => void): EventSource {
         return this.listenForShareTransactions(callback)
     }
 
