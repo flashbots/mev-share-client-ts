@@ -14,14 +14,14 @@ const NUM_TARGET_BLOCKS = 5
  */
 const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingShareTransaction, matchmaker: Matchmaker, targetBlock: number) => {
     // send ofa bundle w/ (basefee + 100)gwei gas fee
-    let {tx, wallet} = (await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing"))
-    tx = {
+    const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
+    const backrunTx = {
         ...tx,
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
     }
-    const backrun = [await wallet.signTransaction(tx)]
+    const backrun = [await wallet.signTransaction(backrunTx)]
     const shareTxs = [pendingTx.txHash]
-    let backrunResults = []
+    const backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
     for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
         const params: ShareBundleParams = {
@@ -47,8 +47,8 @@ const handleBackrun = async (
     pendingMutex: Mutex,
 ) => {
     console.log("pending tx", pendingTx)
-    let targetBlock = await provider.getBlockNumber() + 2
-    let { backrun, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    const targetBlock = await provider.getBlockNumber() + 2
+    const { backrun, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
     console.log("backrun results", backrunResults)
 
     // watch future blocks for backrun tx inclusion
@@ -96,7 +96,7 @@ const main = async () => {
     await pendingMutex.acquire()
     // send a tx that we can backrun on every block
     // tx will be backrun independently by the `handleBackrun` callback
-    const blockHandler = await provider.on("block", async (_) => {
+    const blockHandler = await provider.on("block", async () => {
         await sendTx(provider, {logs: true, contractAddress: true, calldata: true, functionSelector: true})
     })
 
