@@ -1,5 +1,5 @@
 /// interfaces =================================================================
-
+import { LogParams } from "ethers"
 /**
  * Hints specify which data is shared with searchers on mev-share.
  */
@@ -51,7 +51,7 @@ export interface PendingShareTransaction {
     /** 4byte function selector */
     functionSelector?: string,
     /** bytes; logs emitted by the tx */
-    logs?: string,
+    logs?: LogParams[],
     /** bytes; calldata of the tx */
     callData?: string,
 }
