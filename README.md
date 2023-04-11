@@ -67,13 +67,13 @@ yarn example.backrun
 
 ## API
 
-### `listenForShareTransactions`
+### `onShareTransaction`
 
 Starts listening for transactions on mev-share, registers the provided callback to be called when a new transaction is detected.
 
 ```typescript
 const callback = (tx: PendingShareTransaction) => {/* handle pending tx */}
-const handler = matchmaker.listenForShareTransactions(callback)
+const handler = matchmaker.onShareTransaction(callback)
 // do some stuff...
 handler.close()
 ```
