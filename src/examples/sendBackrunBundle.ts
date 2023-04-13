@@ -18,22 +18,33 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
         ...tx,
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
     }
-    const backrun = [await wallet.signTransaction(backrunTx)]
-    const shareTxs = [pendingTx.txHash]
+    const bundle = [
+        {hash: pendingTx.txHash},
+        {tx: await wallet.signTransaction(backrunTx), canRevert: false}
+    ]
     const backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
     for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
         const params: BundleParams = {
-            targetBlock: targetBlock + i,
-            backrun,
-            shareTxs,
+            inclusion: {
+                block: targetBlock + i,
+            },
+            body: bundle,
+            validity: {
+                refund: [
+                    {address: wallet.address, percent: 10}
+                ]
+            },
+            privacy: {
+                hints: ["transactionHash"],
+            }
         }
         const backrunRes = matchmaker.sendBundle(params)
         console.debug("sent bundle", JSON.stringify(params))
         backrunResults.push(backrunRes)
     }
     return {
-        backrun,
+        bundle,
         backrunResults: await Promise.all(backrunResults),
     }
 }
@@ -47,7 +58,7 @@ const handleBackrun = async (
 ) => {
     console.log("pending tx", pendingTx)
     const targetBlock = await provider.getBlockNumber() + 2
-    const { backrun, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    const { bundle, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
     console.log("backrun results", backrunResults)
 
     // watch future blocks for backrun tx inclusion
@@ -63,15 +74,15 @@ const handleBackrun = async (
         }
 
         // check for inclusion of backrun tx in target block
-        const backrunTxHash = keccak256(backrun[0])
-        const receipt = await provider.getTransactionReceipt(backrunTxHash)
+        const checkTxHash = keccak256(bundle[1].tx!)
+        const receipt = await provider.getTransactionReceipt(checkTxHash)
         if (receipt?.status === 1) {
-            console.log("backrun tx included!")
+            console.log("bundle included!")
             // release mutex so the main thread can exit
             pendingMutex.release()
             break
         } else {
-            console.warn(`tx ${backrunTxHash} not included in block ${targetBlock}`)
+            console.warn(`backrun tx ${checkTxHash} not included in block ${targetBlock}`)
         }
     }
 }

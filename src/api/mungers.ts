@@ -34,9 +34,16 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
     }]
 }
 
+// export function mungeSendBundleParams(params: BundleParams) {
+//     return [{
+//         ...params,
+//         targetBlock: `0x${params.targetBlock.toString(16)}`,
+//     }]
+// }
+
 export function mungeSendBundleParams(params: BundleParams) {
     return [{
         ...params,
-        targetBlock: `0x${params.targetBlock.toString(16)}`,
+        inclusion: {...params.inclusion, block: `0x${params.inclusion.block.toString(16)}`},
     }]
 }
