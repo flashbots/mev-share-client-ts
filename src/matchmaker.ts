@@ -6,14 +6,14 @@ import { NetworkFailure, UnimplementedNetwork, UnimplementedStreamEvent } from '
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent, MatchmakerEvent } from './api/interfaces'
 import { mungeSendBundleParams, mungePrivateTxParams } from "./api/mungers"
-import supportedNetworks from './api/networks'
+import {SupportedNetworks} from './api/networks'
 
 export default class Matchmaker {
     constructor(
         private authSigner: Wallet,
         private network: MatchmakerNetwork,
     ) {
-        if (!Object.values(supportedNetworks).map(n => n.chainId).includes(network.chainId)) {
+        if (!SupportedNetworks.supportsChainId(network.chainId)) {
             throw new UnimplementedNetwork(network)
         }
         this.authSigner = authSigner

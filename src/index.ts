@@ -1,5 +1,4 @@
 import Matchmaker from './matchmaker'
-import supportedNetworks from "./api/networks"
 
 export {
     BundleParams,
@@ -9,6 +8,6 @@ export {
     TransactionOptions,
 } from "./api/interfaces"
 
-export const SupportedNetworks = supportedNetworks
+export {SupportedNetworks} from "./api/networks"
 
 export default Matchmaker
