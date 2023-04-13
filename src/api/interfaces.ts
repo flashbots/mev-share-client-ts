@@ -8,19 +8,23 @@ export enum StreamEvent {
 }
 
 /**
- * Configuration used to connect to the Matchmaker.
+ * Configuration used to connect to the Matchmaker. Use [supportedNetworks](./networks.ts) for presets.
  */
 export type MatchmakerNetwork = {
+    /** Chain ID of the network. e.g. `1` */
     chainId: number,
+    /** Lowercase name of network. e.g. "mainnet" */
     name: string,
+    /** Matchmaker event stream URL. */
     streamUrl: string,
+    /** Matchmaker bundle & transaction API URL. */
     apiUrl: string,
 }
 
-/// should be extended with additional types as they're created: `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
 /**
  * Specifies what kind of data is parsed from a Matchmaker stream event.
- */
+*/
+/// should be extended with additional types as they're created: `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
 export type MatchmakerEvent = PendingTransaction
 
 /**
