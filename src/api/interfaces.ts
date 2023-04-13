@@ -17,6 +17,12 @@ export type MatchmakerNetwork = {
     apiUrl: string,
 }
 
+/// should be extended with additional types as they're created: `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
+/**
+ * Specifies what kind of data is parsed from a Matchmaker stream event.
+ */
+export type MatchmakerEvent = PendingTransaction
+
 /**
  * Hints specify which data is shared with searchers on mev-share.
  */

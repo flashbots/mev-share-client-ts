@@ -4,7 +4,7 @@ import EventSource from "eventsource"
 import { NetworkFailure, UnimplementedNetwork, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent } from './api/interfaces'
+import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent, MatchmakerEvent } from './api/interfaces'
 import { mungeSendBundleParams, mungePrivateTxParams } from "./api/mungers"
 import supportedNetworks from './api/networks'
 
@@ -20,7 +20,13 @@ export default class Matchmaker {
         this.network = network
     }
 
-    private async handleBundleApiRequest(params: any, method: any) {
+    /**
+     * Sends a POST request to the Matchmaker API and returns the data.
+     * @param params JSON-RPC params.
+     * @param method JSON-RPC method.
+     * @returns Response data from the API request.
+     */
+    private async handleApiRequest(params: any, method: any): Promise<any> {
         const {body, headers} = await getRpcRequest(params, method, this.authSigner)
         try {
             const res = await axios.post(this.network.apiUrl, body, {
@@ -53,8 +59,7 @@ export default class Matchmaker {
      */
     public on(
         eventType: StreamEvent,
-        callback: (data: PendingTransaction) => void
-        // callback's `data` signature should be extended with additional types as they're created: `data: PendingTransaction | SomeOtherType | ...`
+        callback: (data: MatchmakerEvent) => void
     ): EventSource {
         if (!this.network.streamUrl) throw new UnimplementedNetwork(this.network)
         const events = new EventSource(this.network.streamUrl)
@@ -88,7 +93,7 @@ export default class Matchmaker {
         options?: TransactionOptions,
     ): Promise<string> {
         const params = mungePrivateTxParams(signedTx, options)
-        return await this.handleBundleApiRequest(params, "eth_sendPrivateTransaction")
+        return await this.handleApiRequest(params, "eth_sendPrivateTransaction")
     }
 
     /** Sends a Share bundle to mev-share.
@@ -97,6 +102,6 @@ export default class Matchmaker {
      */
     public async sendBundle(bundleParams: BundleParams): Promise<string[]> {
         const params = mungeSendBundleParams(bundleParams)
-        return await this.handleBundleApiRequest(params, "mev_sendBundle")
+        return await this.handleApiRequest(params, "mev_sendBundle")
     }
 }
