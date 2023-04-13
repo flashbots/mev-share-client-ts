@@ -2,8 +2,7 @@ import { JsonRpcProvider, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker from '..'
-import { ShareBundleParams, PendingShareTransaction } from '../api'
+import Matchmaker, { BundleParams, PendingTransaction, StreamEvent } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
 
@@ -12,8 +11,8 @@ const NUM_TARGET_BLOCKS = 5
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
-const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingShareTransaction, matchmaker: Matchmaker, targetBlock: number) => {
-    // send ofa bundle w/ (basefee + 100)gwei gas fee
+const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
+    // send bundle w/ (basefee + 100)gwei gas fee
     const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
     const backrunTx = {
         ...tx,
@@ -24,13 +23,13 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
     const backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
     for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
-        const params: ShareBundleParams = {
+        const params: BundleParams = {
             targetBlock: targetBlock + i,
             backrun,
             shareTxs,
         }
-        const backrunRes = matchmaker.sendShareBundle(params)
-        console.debug("sent share bundle", JSON.stringify(params))
+        const backrunRes = matchmaker.sendBundle(params)
+        console.debug("sent bundle", JSON.stringify(params))
         backrunResults.push(backrunRes)
     }
     return {
@@ -41,7 +40,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
 
 /** Async handler which backruns an mev-share tx with another basic example tx. */
 const handleBackrun = async (
-    pendingTx: PendingShareTransaction,
+    pendingTx: PendingTransaction,
     provider: JsonRpcProvider,
     matchmaker: Matchmaker,
     pendingMutex: Mutex,
@@ -90,7 +89,7 @@ const main = async () => {
     const pendingMutex = new Mutex()
     
     // listen for txs
-    const txHandler = matchmaker.onShareTransaction(pendingTx => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
+    const txHandler = matchmaker.on(StreamEvent.Transaction, pendingTx => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
     console.log("listening for transactions...")
 
     await pendingMutex.acquire()

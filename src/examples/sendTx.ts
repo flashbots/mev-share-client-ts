@@ -1,4 +1,4 @@
-import { HintPreferences } from '../api'
+import { HintPreferences } from '..'
 import { getProvider } from './lib/helpers'
 import { sendTx } from './lib/sendTx'
 

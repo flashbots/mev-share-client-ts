@@ -1,6 +1,6 @@
 import { hexlify, toBigInt, toUtf8Bytes } from 'ethers'
 import { JsonRpcProvider, TransactionRequest } from 'ethers/types/providers'
-import { HintPreferences } from '../../api'
+import { HintPreferences } from '../..'
 import { initExample } from './helpers'
 
 export const setupTxExample = async (provider: JsonRpcProvider, tip?: BigInt, flair?: string) => {
@@ -34,8 +34,8 @@ export const sendTx = async (
     tip?: BigInt,
 ) => {
     const {matchmaker, signedTx} = await setupTxExample(provider, tip)
-    const res = await matchmaker.sendShareTransaction(signedTx,
+    const res = await matchmaker.sendTransaction(signedTx,
         {hints, maxBlockNumber}
     )
-    console.debug("send private tx result", res)
+    console.debug("sent tx", res)
 }
