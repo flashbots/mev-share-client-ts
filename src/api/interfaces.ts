@@ -72,7 +72,7 @@ export interface TransactionOptions {
  */
 export interface BundleParams {
     /** Smart bundle spec version. */
-    version?: number,
+    version?: number | string,
     /** Conditions for the bundle to be considered for inclusion in a block, evaluated _before_ the bundle is placed in a block. */
     inclusion: {
         /** Target block number in which to include the bundle. */
