@@ -8,7 +8,9 @@ export enum StreamEvent {
 }
 
 /**
- * Configuration used to connect to the Matchmaker. Use [supportedNetworks](./networks.ts) for presets.
+ * Configuration used to connect to the Matchmaker.
+ *
+ * Use [supportedNetworks](./networks.ts) for presets.
  */
 export type MatchmakerNetwork = {
     /** Chain ID of the network. e.g. `1` */
@@ -24,7 +26,8 @@ export type MatchmakerNetwork = {
 /**
  * Specifies what kind of data is parsed from a Matchmaker stream event.
 */
-/// should be extended with additional types as they're created: `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
+/// should be extended with additional event types as they're created
+/// `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
 export type MatchmakerEvent = PendingTransaction
 
 /**
@@ -50,22 +53,6 @@ export interface TransactionOptions {
     /** Maximum block number for the transaction to be included in. */
     maxBlockNumber?: number,
 }
-
-// /**
-//  * Parameters sent to eth_sendShareBundle.
-//  */
-// export interface BundleParams {
-//     /** Smart bundle spec version. */
-//     version?: number,
-//     /** uuidv4. */
-//     replacementUuid?: string,
-//     /** Bundle will be assumed correct only for targetBlockNumber or until cancelled. */
-//     targetBlock: number,
-//     /** Array of signed txs that backrun each transaction in `shareTxs`. */
-//     backrun: string[],
-//     /** Array of mev-share tx hashes for the backrun to follow (currently only one tx hash is supported). */
-//     shareTxs: string[]
-// }
 
 /**
  * Parameters sent to mev_sendBundle.

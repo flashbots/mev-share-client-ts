@@ -20,6 +20,14 @@ export default class Matchmaker {
         this.network = network
     }
 
+    static useEthereumMainnet(authSigner: Wallet): Matchmaker {
+        return new Matchmaker(authSigner, SupportedNetworks.mainnet)
+    }
+
+    static useEthereumGoerli(authSigner: Wallet): Matchmaker {
+        return new Matchmaker(authSigner, SupportedNetworks.goerli)
+    }
+
     /**
      * Sends a POST request to the Matchmaker API and returns the data.
      * @param params JSON-RPC params.

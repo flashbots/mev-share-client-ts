@@ -30,12 +30,44 @@ In your project:
 
 ```typescript
 import { Wallet, JsonRpcProvider } from "ethers"
-import Matchmaker, { ShareBundleParams, PendingShareTransaction, ShareTransactionOptions } from "@flashbots/matchmaker-ts"
+import Matchmaker, {
+    BundleParams,
+    HintPreferences,
+    PendingTransaction,
+    StreamEvent,
+    TransactionOptions
+} from "@flashbots/matchmaker-ts"
 
-const provider = new JsonRpcProvider(GOERLI_RPC_URL)
+const provider = new JsonRpcProvider(RPC_URL)
 const authSigner = new Wallet(FB_REPUTATION_PRIVATE_KEY, provider)
-const matchmaker = new Matchmaker(authSigner, {chainId: 5, name: "goerli"})
 ```
+
+The `Matchmaker` class has built-in initializers for networks supported by Flashbots.
+
+#### Connect to Ethereum Mainnet
+
+```typescript
+const matchmaker = Matchmaker.useEthereumMainnet(authSigner)
+```
+
+#### Connect to Ethereum Goerli
+
+```typescript
+const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
+```
+
+To use custom network parameters, you can instantiate a new Matchmaker directly. This example is what the client uses to connect to mainnet:
+
+```typescript
+const matchmaker = new Matchmaker(authSigner, {
+    name: "mainnet",
+    chainId: 1,
+    streamUrl: "https://mev-share.flashbots.net",
+    apiUrl: "https://relay.flashbots.net"
+})
+```
+
+See [MatchmakerNetwork](/src/api/interfaces.ts#L15) for more details.
 
 ### examples
 
@@ -51,7 +83,7 @@ vim .env
 
 #### send a tx with hints
 
-This example sends a transaction to mev-share from the account specified by SENDER_PRIVATE_KEY with a hex-encoded string as data.
+This example sends a transaction to the Flashbots Goerli Matchmaker from the account specified by SENDER_PRIVATE_KEY with a hex-encoded string as calldata.
 
 ```sh
 yarn example.tx
@@ -59,51 +91,75 @@ yarn example.tx
 
 #### backrun a pending tx
 
-This example watches the mev-share streaming endpoint for pending mev-share transactions and attempts to backrun them. The example runs until a backrun has been included on-chain.
+This example watches the mev-share streaming endpoint for pending mev-share transactions and attempts to backrun them all. The example runs until a backrun has been included on-chain.
 
 ```sh
 yarn example.backrun
 ```
 
-## API
+## Usage
 
-### `onShareTransaction`
+See [src/api/interfaces.ts](src/api/interfaces.ts) for interface definitions.
 
-Starts listening for transactions on mev-share, registers the provided callback to be called when a new transaction is detected.
+### `on`
+
+Use `on` to start listening for events on mev-share. The function registers the provided callback to be called when a new event is detected.
 
 ```typescript
-const callback = (tx: PendingShareTransaction) => {/* handle pending tx */}
-const handler = matchmaker.onShareTransaction(callback)
-// do some stuff...
+const handler = matchmaker.on(StreamEvent.Transaction, (tx: PendingTransaction) => {
+    // handle pending tx
+})
+
+// before terminating program
 handler.close()
 ```
 
-### `sendShareTransaction`
+### `sendTransaction`
 
-Sends a private transaction to Flashbots with specified hint parameters.
+Sends a private transaction to the Flashbots Matchmaker with specified hint parameters.
 
 ```typescript
-const shareTxParams: ShareTransactionOptions = {
+const shareTxParams: TransactionOptions = {
     hints: {
         logs: true,
         calldata: false,
         functionSelector: true,
-        contractAddress: true
+        contractAddress: true,
     },
     maxBlockNumber: undefined,
 }
-await matchmaker.sendShareTransaction(SIGNED_TX, shareTxParams)
+await matchmaker.sendTransaction(SIGNED_TX, shareTxParams)
 ```
 
-### `sendShareBundle`
+### `sendBundle`
 
-Sends a bundle; an array of transactions; which tries to backrun a pending mev-share transaction. Currently only one share transaction in `shareTxs` is supported.
+Sends a bundle; an array of transactions with parameters to specify conditions for inclusion and MEV kickbacks. Transactions are placed in the `body` parameter with wrappers to indicate whether they're a new signed transaction or a pending transaction from the event stream.
+
+See [MEV-Share Docs](https://github.com/flashbots/mev-share/blob/main/src/mev_sendBundle.md) for detailed descriptions of these parameters.
 
 ```typescript
-const bundleParams: ShareBundleParams = {
-    targetBlock: TARGET_BLOCK,
-    shareTxs: [PENDING_TX_HASH],
-    backrun: [SIGNED_BACKRUN_TX1, SIGNED_BACKRUN_TX2],
+const bundleParams: BundleParams = {
+    inclusion: {
+        block: TARGET_BLOCK,
+    },
+    body: [
+        {hash: TX_HASH_FROM_EVENT_STREAM},
+        {tx: SIGNED_TX, canRevert: false},
+    ],
+    validity: {
+        refund: [
+            {address: SEARCHER_ADDRESS, percent: 10}
+        ]
+    },
+    privacy: {
+        hints: {
+            calldata: false,
+            logs: false,
+            functionSelector: true,
+            contractAddress: true,
+        },
+        targetBuilders: ["all"]
+    }
 }
-await matchmaker.sendShareBundle(bundleParams)
+await matchmaker.sendBundle(bundleParams)
 ```

@@ -45,13 +45,6 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
     }]
 }
 
-// export function mungeSendBundleParams(params: BundleParams) {
-//     return [{
-//         ...params,
-//         targetBlock: `0x${params.targetBlock.toString(16)}`,
-//     }]
-// }
-
 /**
  * Converts user-specified parameters into parameters for a mev_sendBundle call to the Matchmaker API.
  * @param params Privacy/execution parameters for the bundle

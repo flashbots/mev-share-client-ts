@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Network, Wallet } from 'ethers'
-import Matchmaker, { SupportedNetworks } from '../..'
+import Matchmaker from '../..'
 import Env from './env'
 
 export function getProvider() {
@@ -8,7 +8,7 @@ export function getProvider() {
 
 export async function initExample(provider: JsonRpcProvider) {
     const authSigner = new Wallet(Env.authKey)
-    const matchmaker = new Matchmaker(authSigner, SupportedNetworks.goerli)
+    const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
     const wallet = new Wallet(Env.senderKey)
     const feeData = await provider.getFeeData()
 
