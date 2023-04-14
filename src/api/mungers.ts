@@ -66,6 +66,7 @@ export function mungeSendBundleParams(params: BundleParams) {
         privacy: {
             ...params.privacy,
             hints: extractSpecifiedHints(params.privacy.hints),
+            target_builders: params.privacy.targetBuilders,
         }
     }]
 }

@@ -73,22 +73,34 @@ export interface TransactionOptions {
 export interface BundleParams {
     /** Smart bundle spec version. */
     version?: number,
+    /** Conditions for the bundle to be considered for inclusion in a block, evaluated _before_ the bundle is placed in a block. */
     inclusion: {
-        /** target block number in which to include the bundle */
+        /** Target block number in which to include the bundle. */
         block: number,
     },
-    /** transactions that make up the bundle. `hash` refers to a transaction from the Matchmaker event stream. */
+    /** Transactions that make up the bundle. `hash` refers to a transaction hash from the Matchmaker event stream. */
     body: Array<
         { hash: string } |
         { tx: string, canRevert: boolean }
     >,
+    /** Conditions for bundle to be considered for inclusion in a block, evaluated _after_ the bundle is placed in the block. */
     validity: {
+        /** Conditions for receiving MEV kickbacks. */
         refund: Array<
-            { address: string, percent: number }
+            {
+                /** The address that receives the kickback. */
+                address: string,
+                /** The minimum percent of MEV kickback received to be eligible for inclusion. */
+                percent: number
+            }
         >
     },
+    /** Bundle privacy parameters. */
     privacy: {
+        /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints: HintPreferences,
+        /** Builders that are allowed to receive this bundle. */
+        targetBuilders: Array<string>,
     },
 }
 
