@@ -88,7 +88,7 @@ export interface BundleParams {
         >
     },
     privacy: {
-        hints: Array<"logs" | "calldata" | "contractAddress" | "functionSelector" | "transactionHash">,
+        hints: HintPreferences,
     },
 }
 

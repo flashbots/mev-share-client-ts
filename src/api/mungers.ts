@@ -61,7 +61,11 @@ export function mungeSendBundleParams(params: BundleParams) {
     const body = params.body.map(tx => ({...tx, can_revert: 'canRevert' in tx ? tx.canRevert : undefined}))
     return [{
         ...params,
-        inclusion: {...params.inclusion, block: `0x${params.inclusion.block.toString(16)}`},
         body,
+        inclusion: {...params.inclusion, block: `0x${params.inclusion.block.toString(16)}`},
+        privacy: {
+            ...params.privacy,
+            hints: extractSpecifiedHints(params.privacy.hints),
+        }
     }]
 }

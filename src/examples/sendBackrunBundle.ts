@@ -36,7 +36,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
                 ]
             },
             privacy: {
-                hints: ["transactionHash"],
+                hints: {calldata: false, logs: true, functionSelector: true, contractAddress: true},
             }
         }
         const backrunRes = matchmaker.sendBundle(params)
