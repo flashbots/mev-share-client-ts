@@ -64,29 +64,37 @@ export interface BundleParams {
     inclusion: {
         /** Target block number in which to include the bundle. */
         block: number,
+        /** Maximum block height in which the bundle can be included. */
+        maxBlock?: number,
     },
     /** Transactions that make up the bundle. `hash` refers to a transaction hash from the Matchmaker event stream. */
     body: Array<
         { hash: string } |
-        { tx: string, canRevert: boolean }
+        { tx: string, canRevert: boolean } |
+        { bundle: BundleParams }
     >,
     /** Conditions for bundle to be considered for inclusion in a block, evaluated _after_ the bundle is placed in the block. */
     validity: {
-        /** Conditions for receiving MEV kickbacks. */
-        refund: Array<
-            {
-                /** The address that receives the kickback. */
-                address: string,
-                /** The minimum percent of MEV kickback received to be eligible for inclusion. */
-                percent: number
-            }
-        >
+        /** Conditions for receiving refunds (MEV kickbacks). */
+        refund: Array<{
+            /** Index of entry in `body` to which the refund percentage applies. */
+            bodyIdx: number,
+            /** Minimum refund percentage required for this bundle to be eligible for use by another searcher. */
+            percent: number,
+        }>,
+        /** Specifies how refund should be paid if bundle is used by another searcher. */
+        refundConfig: Array<{
+            /** The address that receives this portion of the refund. */
+            address: string,
+            /** Percentage of refund to be paid to `address`. Set this to `100` unless splitting refunds between multiple recipients. */
+            percent: number,
+        }>,
     },
     /** Bundle privacy parameters. */
     privacy: {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints: HintPreferences,
-        /** Builders that are allowed to receive this bundle. */
+        /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
         targetBuilders: Array<string>,
     },
 }

@@ -6,7 +6,7 @@ import { NetworkFailure, UnimplementedStreamEvent } from './error'
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent, MatchmakerEvent } from './api/interfaces'
 import { mungeSendBundleParams, mungePrivateTxParams } from "./api/mungers"
-import {SupportedNetworks} from './api/networks'
+import { SupportedNetworks } from './api/networks'
 
 export default class Matchmaker {
     constructor(
