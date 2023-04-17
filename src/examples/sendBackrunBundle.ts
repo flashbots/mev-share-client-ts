@@ -32,8 +32,13 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
             body: bundle,
             validity: {
                 refund: [
-                    {address: wallet.address, percent: 10}
-                ]
+                    {bodyIdx: 0, percent: 90},
+                    {bodyIdx: 1, percent: 10},
+                ],
+                refundConfig: [{
+                    address: wallet.address,
+                    percent: 100,
+                }]
             },
             privacy: {
                 hints: {calldata: false, logs: true, functionSelector: true, contractAddress: true},
