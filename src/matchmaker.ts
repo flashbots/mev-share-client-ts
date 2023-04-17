@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios"
 import { Wallet } from 'ethers'
 import EventSource from "eventsource"
-import { NetworkFailure, UnimplementedNetwork, UnimplementedStreamEvent } from './error'
+import { NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent, MatchmakerEvent } from './api/interfaces'
@@ -13,9 +13,6 @@ export default class Matchmaker {
         private authSigner: Wallet,
         private network: MatchmakerNetwork,
     ) {
-        if (!SupportedNetworks.supportsChainId(network.chainId)) {
-            throw new UnimplementedNetwork(network)
-        }
         this.authSigner = authSigner
         this.network = network
     }
@@ -69,7 +66,6 @@ export default class Matchmaker {
         eventType: StreamEvent,
         callback: (data: MatchmakerEvent) => void
     ): EventSource {
-        if (!this.network.streamUrl) throw new UnimplementedNetwork(this.network)
         const events = new EventSource(this.network.streamUrl)
 
         const eventHandler =
