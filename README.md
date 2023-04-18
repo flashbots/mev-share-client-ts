@@ -33,7 +33,8 @@ import { Wallet, JsonRpcProvider } from "ethers"
 import Matchmaker, {
     BundleParams,
     HintPreferences,
-    PendingTransaction,
+    IPendingBundle,
+    IPendingTransaction,
     StreamEvent,
     TransactionOptions
 } from "@flashbots/matchmaker-ts"
@@ -55,6 +56,24 @@ const matchmaker = Matchmaker.useEthereumMainnet(authSigner)
 ```typescript
 const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
 ```
+
+#### Connect with an Ethers Provider or Chain ID
+
+Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a Matchmaker using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
+
+```typescript
+import { JsonRpcProvider } from "ethers" // ethers v6
+
+/** connects to Flashbots matchmaker on goerli */
+function connectMatchmaker(provider: JsonRpcProvider) {
+    return Matchmaker.fromNetwork(provider._network)
+}
+
+// manually with a chainId:
+const matchmaker = Matchmaker.fromNetwork({chainId: 5})
+```
+
+#### Connect to a custom network
 
 To use custom network parameters, you can instantiate a new Matchmaker directly. This example is what the client uses to connect to mainnet:
 
@@ -106,7 +125,7 @@ See [src/api/interfaces.ts](src/api/interfaces.ts) for interface definitions.
 Use `on` to start listening for events on mev-share. The function registers the provided callback to be called when a new event is detected.
 
 ```typescript
-const handler = matchmaker.on(StreamEvent.Transaction, (tx: PendingTransaction) => {
+const handler = matchmaker.on(StreamEvent.Transaction, (tx: IPendingTransaction) => {
     // handle pending tx
 })
 

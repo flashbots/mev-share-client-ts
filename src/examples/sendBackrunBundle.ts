@@ -2,19 +2,16 @@ import { JsonRpcProvider, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker, { BundleParams } from '..'
+import Matchmaker, { BundleParams, IPendingTransaction, StreamEvent } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
-import { PendingTransaction, StreamEvent } from '../api/events'
-import { IPendingTransaction } from '../api/interfaces'
 
 const NUM_TARGET_BLOCKS = 3
-
 
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
-const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
+const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
     // send bundle w/ (basefee + 100)gwei gas fee
     const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
     const backrunTx = {
@@ -26,7 +23,6 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
         {tx: await wallet.signTransaction(backrunTx), canRevert: false},
     ]
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
-
     const params: BundleParams = {
         inclusion: {
             block: targetBlock,
@@ -43,7 +39,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
 
 /** Async handler which backruns an mev-share tx with another basic example tx. */
 const handleBackrun = async (
-    pendingTx: PendingTransaction,
+    pendingTx: IPendingTransaction,
     provider: JsonRpcProvider,
     matchmaker: Matchmaker,
     pendingMutex: Mutex,

@@ -1,6 +1,5 @@
 import { LogParams } from 'ethers';
 import { IMatchmakerEvent, IPendingBundle, IPendingTransaction } from './interfaces';
-import { StreamEvent } from './interfaces';
 
 export class PendingTransaction implements IPendingTransaction {
     hash: string
@@ -29,5 +28,3 @@ export class PendingBundle implements IPendingBundle {
         this.txs = event.txs
     }
 }
-
-export {StreamEvent}
