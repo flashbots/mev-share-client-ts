@@ -119,8 +119,8 @@ export default class Matchmaker {
         return await this.handleApiRequest(params, "eth_sendPrivateTransaction")
     }
 
-    /** Sends a Share bundle to mev-share.
-     * @param params Parameters for the Share bundle.
+    /** Sends a bundle to mev-share.
+     * @param params Parameters for the bundle.
      * @returns Array of bundle hashes.
      */
     public async sendBundle(params: BundleParams): Promise<string[]> {
@@ -128,6 +128,13 @@ export default class Matchmaker {
         return await this.handleApiRequest(mungedParams, "mev_sendBundle")
     }
 
+    /** Simulates a matched bundle.
+     *
+     * Note: This may only be used on matched bundles.
+     * Simulating unmatched bundles (i.e. bundles with a hash present) will throw an error.
+     * @param params Parameters for the bundle.
+     * @returns Simulation data object.
+     */
     public async simulateBundle(params: BundleParams): Promise<any> {
         const mungedParams = mungeBundleParams(params)
         return await this.handleApiRequest(mungedParams, "mev_simBundle")
