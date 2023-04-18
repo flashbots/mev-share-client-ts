@@ -52,6 +52,7 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
  */
 export function mungeBundleParams(params: BundleParams) {
     type AnyBundleItem = {hash?: string, tx?: string, bundle?: any, canRevert?: boolean}
+    // recursively munge nested bundle params
     const mungedBundle: any[] = params.body.map((i: AnyBundleItem) => i.bundle ? mungeBundleParams(i.bundle) : i)
     return [{
         ...params,
