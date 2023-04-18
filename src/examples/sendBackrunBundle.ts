@@ -6,7 +6,7 @@ import Matchmaker, { BundleParams, IMatchmakerEvent, StreamEvent } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
 
-const NUM_TARGET_BLOCKS = 5
+const NUM_TARGET_BLOCKS = 3
 
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
@@ -22,36 +22,22 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IMatc
         {hash: pendingTx.hash},
         {tx: await wallet.signTransaction(backrunTx), canRevert: false},
     ]
-    const backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
-    for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
-        const params: BundleParams = {
-            inclusion: {
-                block: targetBlock + i,
-            },
-            body: bundle,
-            validity: {
-                refund: [
-                    {bodyIdx: 0, percent: 90},
-                    {bodyIdx: 1, percent: 10},
-                ],
-                refundConfig: [{
-                    address: wallet.address,
-                    percent: 100,
-                }]
-            },
-            privacy: {
-                hints: {calldata: false, logs: true, functionSelector: true, contractAddress: true},
-                targetBuilders: ["all"]
-            }
+
+    const params: BundleParams = {
+        inclusion: {
+            block: targetBlock,
+            maxBlock: targetBlock + NUM_TARGET_BLOCKS,
+        },
+        body: bundle,
+        metadata: {
+            originId: wallet.address
         }
-        const backrunRes = matchmaker.sendBundle(params)
-        console.debug("sent bundle", JSON.stringify(params))
-        backrunResults.push(backrunRes)
     }
+    const backrunResult = await matchmaker.sendBundle(params)
     return {
         bundle,
-        backrunResults: await Promise.all(backrunResults),
+        backrunResult,
     }
 }
 
@@ -64,8 +50,8 @@ const handleBackrun = async (
 ) => {
     console.log("pending tx", pendingTx)
     const targetBlock = await provider.getBlockNumber() + 2
-    const { bundle, backrunResults } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
-    console.log("backrun results", backrunResults)
+    const { bundle, backrunResult } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    console.log("backrun result", backrunResult)
 
     // watch future blocks for backrun tx inclusion
     for (let i = 0; i < NUM_TARGET_BLOCKS; i++) {
@@ -83,7 +69,7 @@ const handleBackrun = async (
         const checkTxHash = keccak256(bundle[1].tx!)
         const receipt = await provider.getTransactionReceipt(checkTxHash)
         if (receipt?.status === 1) {
-            console.log("bundle included!")
+            console.log(`bundle included! (found tx ${receipt.hash})`)
             // release mutex so the main thread can exit
             pendingMutex.release()
             break

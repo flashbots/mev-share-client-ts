@@ -68,16 +68,16 @@ export interface BundleParams {
         { bundle: BundleParams }
     >,
     /** Conditions for bundle to be considered for inclusion in a block, evaluated _after_ the bundle is placed in the block. */
-    validity: {
+    validity?: {
         /** Conditions for receiving refunds (MEV kickbacks). */
-        refund: Array<{
+        refund?: Array<{
             /** Index of entry in `body` to which the refund percentage applies. */
             bodyIdx: number,
             /** Minimum refund percentage required for this bundle to be eligible for use by another searcher. */
             percent: number,
         }>,
         /** Specifies how refund should be paid if bundle is used by another searcher. */
-        refundConfig: Array<{
+        refundConfig?: Array<{
             /** The address that receives this portion of the refund. */
             address: string,
             /** Percentage of refund to be paid to `address`. Set this to `100` unless splitting refunds between multiple recipients. */
@@ -85,12 +85,15 @@ export interface BundleParams {
         }>,
     },
     /** Bundle privacy parameters. */
-    privacy: {
+    privacy?: {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
-        hints: HintPreferences,
+        hints?: HintPreferences,
         /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
-        targetBuilders: Array<string>,
+        targetBuilders?: Array<string>,
     },
+    metadata: {
+        originId: string,
+    }
 }
 
 /**
