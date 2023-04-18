@@ -53,7 +53,7 @@ export interface TransactionOptions {
  */
 export interface BundleParams {
     /** Smart bundle spec version. */
-    version?: number | string,
+    version?: string,
     /** Conditions for the bundle to be considered for inclusion in a block, evaluated _before_ the bundle is placed in a block. */
     inclusion: {
         /** Target block number in which to include the bundle. */
@@ -100,7 +100,7 @@ export interface IMatchmakerEvent {
     /** Transaction or Bundle hash. */
     hash: string,
     /** Logs emitted by the transaction or bundle. */
-    logs?: LogParams[],
+    logs?: LogParams[] | null,
     txs?: Array<{
         /** Transaction recipient address. */
         to?: string,

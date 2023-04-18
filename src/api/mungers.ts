@@ -53,6 +53,7 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
 export function mungeSendBundleParams(params: BundleParams) {
     return [{
         ...params,
+        version: params.version || "beta-1", // default latest
         inclusion: {
             ...params.inclusion,
             block: `0x${params.inclusion.block.toString(16)}`,

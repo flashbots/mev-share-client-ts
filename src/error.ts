@@ -8,6 +8,14 @@ class MatchmakerError extends Error {
     }
 }
 
+export class JsonRpcError extends MatchmakerError {
+    constructor(error: {code: number, message: string}) {
+        super(`${error.code}: ${error.message}`)
+        this.name = `JsonRpcError: ${error.code}`
+        this.message = error.message
+    }
+}
+
 export class NetworkFailure extends MatchmakerError {
     constructor(e: AxiosError) {
         const err = e as AxiosError

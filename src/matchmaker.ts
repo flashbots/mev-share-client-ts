@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios"
 import { Wallet } from 'ethers'
 import EventSource from "eventsource"
-import { NetworkFailure, UnimplementedStreamEvent } from './error'
+import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent } from './api/interfaces'
@@ -37,10 +37,17 @@ export default class Matchmaker {
             const res = await axios.post(this.network.apiUrl, body, {
                 headers
             })
-            return (res.data as JsonRpcData).result
+            const data = res.data as JsonRpcData
+            if (data.error) {
+                throw new JsonRpcError(data.error)
+            }
+            return data.result
         } catch (e) {
-            console.debug(JSON.stringify(body))
-            throw new NetworkFailure(e as AxiosError)
+            if (!(e instanceof JsonRpcError)) {
+                throw new NetworkFailure(e as AxiosError)
+            } else {
+                throw e
+            }
         }
     }
 
@@ -50,22 +57,20 @@ export default class Matchmaker {
      * @returns Event listener, which can be used to close the connection.
      */
     private onTransaction(
-        event: MessageEvent<IMatchmakerEvent>,
+        event: IMatchmakerEvent,
         callback: (data: IMatchmakerEvent) => void
     ) {
-        const msg = event.data
-        if (msg.txs && msg.txs.length === 1) {
-            callback(event.data)
+        if (event.txs && event.txs.length === 1) {
+            callback(event)
         }
     }
 
     private onBundle(
-        event: MessageEvent<IMatchmakerEvent>,
+        event: IMatchmakerEvent,
         callback: (data: IMatchmakerEvent) => void
     ) {
-        const msg = event.data
-        if (msg.txs && msg.txs.length > 1) {
-            callback(event.data)
+        if (event.txs && event.txs.length > 1) {
+            callback(event)
         }
     }
 
@@ -88,7 +93,7 @@ export default class Matchmaker {
 
         events.onmessage = (event) => {
             try {
-                eventHandler(event, callback)
+                eventHandler(JSON.parse(event.data), callback)
             } catch (e) {
                 if (e instanceof AxiosError) {
                     throw new NetworkFailure(e)
