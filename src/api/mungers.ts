@@ -50,8 +50,9 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
  * @param params Privacy/execution parameters for the bundle
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */
-export function mungeSendBundleParams(params: BundleParams) {
-    const mungedBundle: any[] = params.body.map((i: {hash?: string, tx?: string, bundle?: any, canRevert?: boolean}) => i.bundle ? mungeSendBundleParams(i.bundle) : i)
+export function mungeBundleParams(params: BundleParams) {
+    type AnyBundleItem = {hash?: string, tx?: string, bundle?: any, canRevert?: boolean}
+    const mungedBundle: any[] = params.body.map((i: AnyBundleItem) => i.bundle ? mungeBundleParams(i.bundle) : i)
     return [{
         ...params,
         body: mungedBundle,

@@ -5,7 +5,7 @@ import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent } from './api/interfaces'
-import { mungeSendBundleParams, mungePrivateTxParams } from "./api/mungers"
+import { mungeBundleParams, mungePrivateTxParams } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 
 export default class Matchmaker {
@@ -120,11 +120,16 @@ export default class Matchmaker {
     }
 
     /** Sends a Share bundle to mev-share.
-     * @param bundleParams Parameters for the Share bundle.
+     * @param params Parameters for the Share bundle.
      * @returns Array of bundle hashes.
      */
-    public async sendBundle(bundleParams: BundleParams): Promise<string[]> {
-        const params = mungeSendBundleParams(bundleParams)
-        return await this.handleApiRequest(params, "mev_sendBundle")
+    public async sendBundle(params: BundleParams): Promise<string[]> {
+        const mungedParams = mungeBundleParams(params)
+        return await this.handleApiRequest(mungedParams, "mev_sendBundle")
+    }
+
+    public async simulateBundle(params: BundleParams): Promise<any> {
+        const mungedParams = mungeBundleParams(params)
+        return await this.handleApiRequest(mungedParams, "mev_simBundle")
     }
 }

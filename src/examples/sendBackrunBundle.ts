@@ -47,7 +47,10 @@ const handleBackrun = async (
 ) => {
     console.log("pending tx", pendingTx)
     const targetBlock = await provider.getBlockNumber() + 2
-    const { bundle, backrunResult } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    const {
+        bundle,
+        backrunResult,
+    } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
     console.log("backrun result", backrunResult)
 
     // watch future blocks for backrun tx inclusion
