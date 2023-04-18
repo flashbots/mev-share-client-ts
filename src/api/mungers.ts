@@ -54,15 +54,14 @@ export function mungeSendBundleParams(params: BundleParams) {
     return [{
         ...params,
         version: params.version || "beta-1", // default latest
-        validity: params.validity ? params.validity :
-        {
-            refund: [],
-            refundConfig: [],
-        },
         inclusion: {
             ...params.inclusion,
             block: `0x${params.inclusion.block.toString(16)}`,
             maxBlock: params.inclusion.maxBlock ? `0x${params.inclusion.maxBlock.toString(16)}` : undefined,
+        },
+        validity: params.validity ? params.validity : {
+            refund: [],
+            refundConfig: [],
         },
         privacy: params.privacy && {
             ...params.privacy,
