@@ -2,7 +2,7 @@ import { JsonRpcProvider, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker, { BundleParams, PendingTransaction, StreamEvent } from '..'
+import Matchmaker, { BundleParams, IMatchmakerEvent, StreamEvent } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
 
@@ -11,7 +11,7 @@ const NUM_TARGET_BLOCKS = 5
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
-const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
+const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IMatchmakerEvent, matchmaker: Matchmaker, targetBlock: number) => {
     // send bundle w/ (basefee + 100)gwei gas fee
     const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
     const backrunTx = {
@@ -19,8 +19,8 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
     }
     const bundle = [
-        {hash: pendingTx.txHash},
-        {tx: await wallet.signTransaction(backrunTx), canRevert: false}
+        {hash: pendingTx.hash},
+        {tx: await wallet.signTransaction(backrunTx), canRevert: false},
     ]
     const backrunResults = []
     console.log(`sending backrun bundles targeting next ${NUM_TARGET_BLOCKS} blocks...`)
@@ -57,7 +57,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: Pendi
 
 /** Async handler which backruns an mev-share tx with another basic example tx. */
 const handleBackrun = async (
-    pendingTx: PendingTransaction,
+    pendingTx: IMatchmakerEvent,
     provider: JsonRpcProvider,
     matchmaker: Matchmaker,
     pendingMutex: Mutex,
@@ -73,7 +73,7 @@ const handleBackrun = async (
             // mutex was released by another handler, so we can exit
             break
         }
-        console.log(`tx ${pendingTx.txHash} waiting for block`, targetBlock + i)
+        console.log(`tx ${pendingTx.hash} waiting for block`, targetBlock + i)
         // poll until block is available
         while (await provider.getBlockNumber() < targetBlock + i) {
             await new Promise(resolve => setTimeout(resolve, 2000))

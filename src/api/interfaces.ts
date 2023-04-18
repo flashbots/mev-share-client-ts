@@ -4,6 +4,7 @@ import { LogParams } from 'ethers'
  * Used to specify which type of event to listen for.
  */
 export enum StreamEvent {
+    Bundle = 'bundle',
     Transaction = 'transaction',
 }
 
@@ -22,13 +23,6 @@ export type MatchmakerNetwork = {
     /** Matchmaker bundle & transaction API URL. */
     apiUrl: string,
 }
-
-/**
- * Specifies what kind of data is parsed from a Matchmaker stream event.
-*/
-/// should be extended with additional event types as they're created
-/// `MatchmakerEvent = PendingTransaction | SomeOtherType | ...`
-export type MatchmakerEvent = PendingTransaction
 
 /**
  * Hints specify which data is shared with searchers on mev-share.
@@ -100,17 +94,19 @@ export interface BundleParams {
 }
 
 /**
- * Data received from Flashbots when a new mev-share transaction is detected.
- */
-export interface PendingTransaction {
-    /** Transaction hash */
-    txHash: string,
-    /** address */
-    to?: string,
-    /** 4byte function selector */
-    functionSelector?: string,
-    /** bytes; logs emitted by the tx */
+ * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`)
+*/
+export interface IMatchmakerEvent {
+    /** Transaction or Bundle hash. */
+    hash: string,
+    /** Logs emitted by the transaction or bundle. */
     logs?: LogParams[],
-    /** bytes; calldata of the tx */
-    callData?: string,
+    txs?: Array<{
+        /** Transaction recipient address. */
+        to?: string,
+        /** 4byte function selector */
+        functionSelector?: string,
+        /** Calldata of the tx */
+        callData?: string,
+    }>
 }

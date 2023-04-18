@@ -3,7 +3,7 @@ import Matchmaker from './matchmaker'
 export {
     BundleParams,
     HintPreferences,
-    PendingTransaction,
+    IMatchmakerEvent,
     StreamEvent,
     TransactionOptions,
 } from "./api/interfaces"

@@ -4,7 +4,7 @@ import EventSource from "eventsource"
 import { NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, PendingTransaction, TransactionOptions, StreamEvent, MatchmakerEvent } from './api/interfaces'
+import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent } from './api/interfaces'
 import { mungeSendBundleParams, mungePrivateTxParams } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 
@@ -50,10 +50,23 @@ export default class Matchmaker {
      * @returns Event listener, which can be used to close the connection.
      */
     private onTransaction(
-        event: MessageEvent<PendingTransaction>,
-        callback: (data: PendingTransaction) => void
+        event: MessageEvent<IMatchmakerEvent>,
+        callback: (data: IMatchmakerEvent) => void
     ) {
-        callback(event.data)
+        const msg = event.data
+        if (msg.txs && msg.txs.length === 1) {
+            callback(event.data)
+        }
+    }
+
+    private onBundle(
+        event: MessageEvent<IMatchmakerEvent>,
+        callback: (data: IMatchmakerEvent) => void
+    ) {
+        const msg = event.data
+        if (msg.txs && msg.txs.length > 1) {
+            callback(event.data)
+        }
     }
 
     /**
@@ -64,12 +77,13 @@ export default class Matchmaker {
      */
     public on(
         eventType: StreamEvent,
-        callback: (data: MatchmakerEvent) => void
+        callback: (data: IMatchmakerEvent) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)
 
         const eventHandler =
             eventType === StreamEvent.Transaction ? this.onTransaction :
+            eventType === StreamEvent.Bundle ? this.onBundle :
             () => { throw new UnimplementedStreamEvent(eventType) }
 
         events.onmessage = (event) => {
