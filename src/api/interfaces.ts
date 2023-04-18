@@ -91,8 +91,8 @@ export interface BundleParams {
         /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
         targetBuilders?: Array<string>,
     },
-    metadata: {
-        originId: string,
+    metadata?: {
+        originId?: string,
     }
 }
 

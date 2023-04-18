@@ -30,9 +30,6 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IMatc
             maxBlock: targetBlock + NUM_TARGET_BLOCKS,
         },
         body: bundle,
-        metadata: {
-            originId: wallet.address
-        }
     }
     const backrunResult = await matchmaker.sendBundle(params)
     return {
@@ -60,7 +57,7 @@ const handleBackrun = async (
             break
         }
         console.log(`tx ${pendingTx.hash} waiting for block`, targetBlock + i)
-        // poll until block is available
+        // stall until target block is available
         while (await provider.getBlockNumber() < targetBlock + i) {
             await new Promise(resolve => setTimeout(resolve, 2000))
         }
@@ -102,7 +99,7 @@ const main = async () => {
         await sendTx(provider, {logs: true, contractAddress: true, calldata: true, functionSelector: true})
     })
 
-    // will block until the handler releases the mutex
+    // will block until one of the handlers releases the mutex
     await pendingMutex.acquire()
     pendingMutex.release()
 
