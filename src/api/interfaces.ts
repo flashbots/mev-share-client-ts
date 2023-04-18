@@ -103,7 +103,7 @@ export interface IMatchmakerEvent {
     /** Transaction or Bundle hash. */
     hash: string,
     /** Logs emitted by the transaction or bundle. */
-    logs?: LogParams[] | null,
+    logs?: LogParams[],
     txs?: Array<{
         /** Transaction recipient address. */
         to?: string,
@@ -113,3 +113,11 @@ export interface IMatchmakerEvent {
         callData?: string,
     }>
 }
+
+export interface IPendingTransaction extends Omit<IMatchmakerEvent, 'txs'> {
+    to?: string,
+    functionSelector?: string,
+    callData?: string,
+}
+
+export type IPendingBundle = IMatchmakerEvent

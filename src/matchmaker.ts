@@ -4,9 +4,10 @@ import EventSource from "eventsource"
 import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent } from './api/interfaces'
+import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle } from './api/interfaces'
 import { mungeBundleParams, mungePrivateTxParams } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
+import { PendingBundle, PendingTransaction } from './api/events';
 
 export default class Matchmaker {
     constructor(
@@ -23,6 +24,11 @@ export default class Matchmaker {
 
     static useEthereumGoerli(authSigner: Wallet): Matchmaker {
         return new Matchmaker(authSigner, SupportedNetworks.goerli)
+    }
+
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): Matchmaker {
+        const network = SupportedNetworks.getNetwork(chainId)
+        return new Matchmaker(authSigner, network)
     }
 
     /**
@@ -53,24 +59,29 @@ export default class Matchmaker {
 
     /**
      * Registers the provided callback to be called when a new MEV-Share transaction is received.
+     * @param event The event received from the event stream.
      * @param callback Async function to process pending tx.
-     * @returns Event listener, which can be used to close the connection.
      */
     private onTransaction(
         event: IMatchmakerEvent,
-        callback: (data: IMatchmakerEvent) => void
+        callback: (data: IPendingTransaction) => void
     ) {
         if (event.txs && event.txs.length === 1) {
-            callback(event)
+            callback(new PendingTransaction(event))
         }
     }
 
+    /**
+     * Registers the provided callback to be called when a new MEV-Share bundle is received.
+     * @param event The event received from the event stream.
+     * @param callback Async function to process pending tx.
+     */
     private onBundle(
         event: IMatchmakerEvent,
-        callback: (data: IMatchmakerEvent) => void
+        callback: (data: IPendingBundle) => void
     ) {
         if (event.txs && event.txs.length > 1) {
-            callback(event)
+            callback(new PendingBundle(event))
         }
     }
 
@@ -82,7 +93,7 @@ export default class Matchmaker {
      */
     public on(
         eventType: StreamEvent,
-        callback: (data: IMatchmakerEvent) => void
+        callback: (data: IPendingBundle | IPendingTransaction) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)
 

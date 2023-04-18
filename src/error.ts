@@ -24,6 +24,13 @@ export class NetworkFailure extends MatchmakerError {
     }
 }
 
+export class UnimplementedNetwork extends MatchmakerError {
+    constructor({chainId}: {chainId: number}) {
+        super(`Cannot infer network params from chainId: ${chainId}`)
+        this.name = "UnimplementedNetwork"
+    }
+}
+
 export class UnimplementedStreamEvent extends MatchmakerError {
     constructor(eventType: StreamEvent) {
         super(`Unimplemented stream event type: ${eventType.toString()}`)

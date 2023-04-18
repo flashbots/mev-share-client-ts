@@ -2,16 +2,19 @@ import { JsonRpcProvider, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker, { BundleParams, IMatchmakerEvent, StreamEvent } from '..'
+import Matchmaker, { BundleParams } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
+import { PendingTransaction, StreamEvent } from '../api/events'
+import { IPendingTransaction } from '../api/interfaces'
 
 const NUM_TARGET_BLOCKS = 3
+
 
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
-const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IMatchmakerEvent, matchmaker: Matchmaker, targetBlock: number) => {
+const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: PendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
     // send bundle w/ (basefee + 100)gwei gas fee
     const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
     const backrunTx = {
@@ -40,7 +43,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IMatc
 
 /** Async handler which backruns an mev-share tx with another basic example tx. */
 const handleBackrun = async (
-    pendingTx: IMatchmakerEvent,
+    pendingTx: PendingTransaction,
     provider: JsonRpcProvider,
     matchmaker: Matchmaker,
     pendingMutex: Mutex,
@@ -92,7 +95,7 @@ const main = async () => {
     const pendingMutex = new Mutex()
     
     // listen for txs
-    const txHandler = matchmaker.on(StreamEvent.Transaction, pendingTx => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
+    const txHandler = matchmaker.on(StreamEvent.Transaction, (pendingTx: IPendingTransaction) => handleBackrun(pendingTx, provider, matchmaker, pendingMutex))
     console.log("listening for transactions...")
 
     await pendingMutex.acquire()
