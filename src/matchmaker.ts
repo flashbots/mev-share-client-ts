@@ -43,8 +43,8 @@ export default class Matchmaker {
             }
             return data.result
         } catch (e) {
-            if (!(e instanceof JsonRpcError)) {
-                throw new NetworkFailure(e as AxiosError)
+            if (e instanceof AxiosError) {
+                throw new NetworkFailure(e)
             } else {
                 throw e
             }
