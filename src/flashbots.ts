@@ -2,7 +2,8 @@ import { id as ethersId, Wallet } from "ethers"
 
 export type JsonRpcData = {
     id: number,
-    result: any,
+    result?: any,
+    error?: {code: number, message: string},
     jsonrpc: string,
 }
 

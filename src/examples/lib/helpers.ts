@@ -8,8 +8,7 @@ export function getProvider() {
 
 export async function initExample(provider: JsonRpcProvider) {
     const authSigner = new Wallet(Env.authKey)
-    const network = {chainId: 5, name: "goerli"}
-    const matchmaker = new Matchmaker(authSigner, network)
+    const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
     const wallet = new Wallet(Env.senderKey)
     const feeData = await provider.getFeeData()
 
