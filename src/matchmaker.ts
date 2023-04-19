@@ -66,7 +66,7 @@ export default class Matchmaker {
         event: IMatchmakerEvent,
         callback: (data: IPendingTransaction) => void
     ) {
-        if (event.txs && event.txs.length === 1) {
+        if (!event.txs || (event.txs && event.txs.length === 1)) {
             callback(new PendingTransaction(event))
         }
     }
