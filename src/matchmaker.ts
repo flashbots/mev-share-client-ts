@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios"
-import { Wallet } from 'ethers'
+import { Transaction, Wallet } from 'ethers'
 import EventSource from "eventsource"
 import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
@@ -8,6 +8,9 @@ import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatc
 import { mungeBundleParams, mungePrivateTxParams } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
+
+// when calling mev_simBundle on a {tx} specified bundle, how long to wait for target to appear onchain
+const TIMEOUT_QUERY_TX_MS = 5 * 60 * 1000
 
 export default class Matchmaker {
     constructor(
@@ -147,7 +150,43 @@ export default class Matchmaker {
      * @returns Simulation data object.
      */
     public async simulateBundle(params: BundleParams): Promise<any> {
-        const mungedParams = mungeBundleParams(params)
-        return await this.handleApiRequest(mungedParams, "mev_simBundle")
+        const firstTx = params.body[0]
+        if ('hash' in firstTx) {
+            console.log("Transaction hash: " + firstTx.hash + " must appear onchain before simulation is possible, waiting")
+            return new Promise((resolve, reject) => {
+                const provider = this.authSigner.provider
+                if (provider == null) {
+                    throw new Error("Need to wait for hash, but we don't have a provider. Attach one to signer wallet")
+                }
+                const waitForTx = async (blockNumber: number) => {
+                    const tx = await provider.getTransaction(firstTx.hash)
+                    if (tx) {
+                        provider.removeListener('block', waitForTx)
+                        const signedTx = Transaction.from(tx).serialized
+                        console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number:${ blockNumber }`)
+                        // TODO: Add params.inclusion.block target to mev_simBundle, not currently implemented in API
+                        const paramsWithSignedTx = {
+                            ...params,
+                            body: [
+                                {
+                                    tx: signedTx, canRevert: false
+                                },
+                                ...params.body.slice(1),
+                            ]
+                        }
+                        resolve(this.handleApiRequest(mungeBundleParams(paramsWithSignedTx), "mev_simBundle"))
+                    }
+                }
+                provider.on('block', waitForTx)
+                setTimeout(() => {
+                    provider.removeListener('block', waitForTx)
+                    console.error("Gave up waiting for " + firstTx.hash)
+                    reject(new Error("Target transaction did not appear onchain before TIMEOUT_QUERY_TX_MS"))
+                }, TIMEOUT_QUERY_TX_MS)
+
+            })
+
+        }
+        return await this.handleApiRequest(mungeBundleParams(params), "mev_simBundle")
     }
 }
