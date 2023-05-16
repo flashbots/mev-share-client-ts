@@ -28,13 +28,13 @@ export type MatchmakerNetwork = {
  * Hints specify which data is shared with searchers on mev-share.
  */
 export interface HintPreferences {
-    /** Share the calldata of the transaction. (default=false) */
+    /** Share the calldata of the transaction. */
     calldata?: boolean,
-    /** Share the contract address of the transaction. (default=true) */
+    /** Share the contract address of the transaction. */
     contractAddress?: boolean,
-    /** Share the 4byte function selector of the transaction. (default=true) */
+    /** Share the 4byte function selector of the transaction. */
     functionSelector?: boolean,
-    /** Share the logs emitted by the transaction. (default=true) */
+    /** Share the logs emitted by the transaction. */
     logs?: boolean,
 }
 
