@@ -65,15 +65,17 @@ const handleBackrun = async (
         }
 
         // check for inclusion of backrun tx in target block
-        const checkTxHash = keccak256(bundle[1].tx!)
-        const receipt = await provider.getTransactionReceipt(checkTxHash)
-        if (receipt?.status === 1) {
-            console.log(`bundle included! (found tx ${receipt.hash})`)
-            // release mutex so the main thread can exit
-            pendingMutex.release()
-            break
-        } else {
-            console.warn(`backrun tx ${checkTxHash} not included in block ${targetBlock}`)
+        if (bundle[1].tx) {
+            const checkTxHash = keccak256(bundle[1].tx)
+            const receipt = await provider.getTransactionReceipt(checkTxHash)
+            if (receipt?.status === 1) {
+                console.log(`bundle included! (found tx ${receipt.hash})`)
+                // release mutex so the main thread can exit
+                pendingMutex.release()
+                break
+            } else {
+                console.warn(`backrun tx ${checkTxHash} not included in block ${targetBlock}`)
+            }
         }
     }
 }
