@@ -111,13 +111,20 @@ export interface IMatchmakerEvent {
         functionSelector?: string,
         /** Calldata of the tx */
         callData?: string,
-    }>
+    }>,
+    mevGasPrice?: string,   // hex string
+    gasUsed?: string,       // hex string
 }
 
-export interface IPendingTransaction extends Omit<IMatchmakerEvent, 'txs'> {
+export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 'txs'>, 'mevGasPrice'>, 'gasUsed'> {
     to?: string,
     functionSelector?: string,
     callData?: string,
+    mevGasPrice?: BigInt,
+    gasUsed?: BigInt,
 }
 
-export type IPendingBundle = IMatchmakerEvent
+export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
+    mevGasPrice?: BigInt,
+    gasUsed?: BigInt,
+}
