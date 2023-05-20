@@ -221,11 +221,11 @@ export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 't
     functionSelector?: string,
     callData?: string,
     /**
-     * {@inheritDoc IMatchmakerEvent.mevGasPrice}
+     * {@link IMatchmakerEvent.mevGasPrice}
      */
     mevGasPrice?: bigint,
     /**
-     * {@inheritDoc IMatchmakerEvent.gasUsed}
+     * {@link IMatchmakerEvent.gasUsed}
      */
     gasUsed?: bigint,
 }
@@ -233,11 +233,11 @@ export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 't
 /** Pending bundle from the matchmaker stream. */
 export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
     /**
-     * {@inheritDoc IMatchmakerEvent.mevGasPrice}
+     * {@link IMatchmakerEvent.mevGasPrice}
      */
     mevGasPrice?: bigint,
     /**
-     * {@inheritDoc IMatchmakerEvent.gasUsed}
+     * {@link IMatchmakerEvent.gasUsed}
      */
     gasUsed?: bigint,
 }
