@@ -8,6 +8,8 @@ export enum StreamEvent {
     Transaction = 'transaction',
 }
 
+export type StreamEventName = `${StreamEvent}`
+
 /**
  * Configuration used to connect to the Matchmaker.
  *
@@ -136,7 +138,7 @@ export interface SimBundleOptions {
     gasLimit?: number,
     /** default = parentBlock.baseFeePerGas */
     baseFee?: bigint,
-    /** default = 5 seconds */
+    /** default = 5 (defined in seconds) */
     timeout?: number,
 }
 

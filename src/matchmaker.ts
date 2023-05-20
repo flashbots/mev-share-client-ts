@@ -4,7 +4,21 @@ import EventSource from "eventsource"
 import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle, SimBundleOptions, SimBundleResult, ISimBundleResult, ISendBundleResult, SendBundleResult } from './api/interfaces'
+import {
+    BundleParams,
+    MatchmakerNetwork,
+    TransactionOptions,
+    StreamEvent,
+    IMatchmakerEvent,
+    IPendingTransaction,
+    IPendingBundle,
+    SimBundleOptions,
+    SimBundleResult,
+    ISimBundleResult,
+    ISendBundleResult,
+    SendBundleResult,
+    StreamEventName
+} from './api/interfaces'
 import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
@@ -88,6 +102,7 @@ export default class Matchmaker {
         }
     }
 
+
     /**
      * Starts listening to the Matchmaker event stream and registers the given callback to be invoked when the given event type is received.
      * @param eventType The type of event to listen for. Options specified by StreamEvent enum.
@@ -95,7 +110,7 @@ export default class Matchmaker {
      * @returns Stream handler. Call `.close()` on it before terminating your program.
      */
     public on(
-        eventType: StreamEvent,
+        eventType: StreamEvent | StreamEventName,
         callback: (data: IPendingBundle | IPendingTransaction) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)

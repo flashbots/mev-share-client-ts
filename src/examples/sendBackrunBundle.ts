@@ -2,7 +2,7 @@ import { JsonRpcProvider, formatEther, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker, { BundleParams, IPendingTransaction, StreamEvent } from '..'
+import Matchmaker, { BundleParams, IPendingTransaction } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
 import { AsyncArray } from './lib/async'
@@ -117,7 +117,7 @@ const main = async () => {
     const pendingMutex = new Mutex()
     
     // listen for txs
-    const txHandler = matchmaker.on(StreamEvent.Transaction, async (pendingTx: IPendingTransaction) => {
+    const txHandler = matchmaker.on("transaction", async (pendingTx: IPendingTransaction) => {
         await handleBackrun(pendingTx, provider, matchmaker, pendingMutex, pendingTxHashes)
     })
     console.log("listening for transactions...")
