@@ -165,12 +165,12 @@ export default class Matchmaker {
                 if (provider == null) {
                     throw new Error("Need to wait for hash, but we don't have a provider. Attach one to signer wallet")
                 }
-                const waitForTx = async (blockNumber: number) => {
+                const waitForTx = async () => {
                     const tx = await provider.getTransaction(firstTx.hash)
                     if (tx) {
                         provider.removeListener('block', waitForTx)
                         const signedTx = Transaction.from(tx).serialized
-                        console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number:${ tx.blockNumber }`)
+                        console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number: ${ tx.blockNumber }`)
                         // TODO: Add params.inclusion.block target to mev_simBundle, not currently implemented in API
                         const paramsWithSignedTx = {
                             ...params,

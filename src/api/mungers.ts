@@ -58,7 +58,7 @@ export function mungeBundleParams(params: BundleParams) {
     return {
         ...params,
         body: mungedBundle,
-        version: params.version || "v0.1", // default latest
+        version: params.version || "v0.1",
         inclusion: {
             ...params.inclusion,
             block: `0x${params.inclusion.block.toString(16)}`,
@@ -78,7 +78,7 @@ export function mungeBundleParams(params: BundleParams) {
 export function mungeSimBundleOptions(params: SimBundleOptions) {
     return {
         ...params,
-        // coinbase, & timeout can be left as they are
+        // coinbase & timeout can be left as they are
         parentBlock: params.parentBlock && `0x${BigInt(params.parentBlock).toString(16)}`,
         blockNumber: params.blockNumber && `0x${BigInt(params.blockNumber).toString(16)}`,
         timestamp: params.timestamp && `0x${BigInt(params.timestamp).toString(16)}`,

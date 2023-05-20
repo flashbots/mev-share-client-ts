@@ -5,6 +5,7 @@ import { Mutex } from "async-mutex"
 import Matchmaker, { BundleParams, IPendingTransaction, StreamEvent } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
+import { AsyncArray } from './lib/async'
 
 const NUM_TARGET_BLOCKS = 3
 
@@ -43,11 +44,11 @@ const handleBackrun = async (
     provider: JsonRpcProvider,
     matchmaker: Matchmaker,
     pendingMutex: Mutex,
-    pendingTxHashes: string[],
-): Promise<string[]> => {
+    pendingTxHashes: AsyncArray<string>,
+): Promise<void> => {
     if (!pendingTxHashes.includes(pendingTx.hash)) {
         // ignore txs we didn't send. they break the bundle (nonce error) bc we're using one account to do everything
-        return pendingTxHashes
+        return
     } else {
         console.log("pending tx", pendingTx)
     }
@@ -94,8 +95,8 @@ const handleBackrun = async (
             }
         }
     }
-    pendingTxHashes = pendingTxHashes.filter(hash => hash !== pendingTx.hash)
-    return pendingTxHashes
+    await pendingTxHashes.filter(hash => hash !== pendingTx.hash)
+    console.log("dropped target tx", pendingTx.hash)
 }
 
 /**
@@ -106,14 +107,17 @@ const handleBackrun = async (
 const main = async () => {
     const provider = getProvider()
     const {matchmaker} = await initExample(provider)
-    let pendingTxHashes: string[] = []
+
+    // used for tracking txs we sent. we only want to backrun txs we sent, 
+    // since we're using one account and incrementing the nonce of the bundle's 2nd tx
+    const pendingTxHashes = new AsyncArray<string>()
 
     // used for blocking this thread until the handler is done processing
     const pendingMutex = new Mutex()
     
     // listen for txs
     const txHandler = matchmaker.on(StreamEvent.Transaction, async (pendingTx: IPendingTransaction) => {
-        pendingTxHashes = await handleBackrun(pendingTx, provider, matchmaker, pendingMutex, pendingTxHashes)
+        await handleBackrun(pendingTx, provider, matchmaker, pendingMutex, pendingTxHashes)
     })
     console.log("listening for transactions...")
 
@@ -121,7 +125,7 @@ const main = async () => {
     // send a tx that we can backrun on every block
     // tx will be backrun independently by the `handleBackrun` callback
     const blockHandler = await provider.on("block", async (blockNum) => {
-        if (pendingTxHashes.length === 0) {
+        if (await pendingTxHashes.length() === 0) {
             const res = await sendTx(provider, {logs: true, contractAddress: true, calldata: true, functionSelector: true}, blockNum + NUM_TARGET_BLOCKS)
             console.log("sent tx", res)
             pendingTxHashes.push(res)
@@ -135,7 +139,6 @@ const main = async () => {
     // stop listening for txs
     txHandler.close()
     await blockHandler.removeAllListeners()
-    console.log("block listener relieved of duty. waiting for handler threads to finish...")
 }
 
 main().then(() => {

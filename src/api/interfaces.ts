@@ -97,7 +97,7 @@ export interface BundleParams {
     }
 }
 
-export interface SimBundleOptions { // all fields are optional
+export interface SimBundleOptions {
     /** Block used for simulation state. Defaults to latest block.
      *
      * Block header data will be derived from parent block by default.
@@ -123,7 +123,7 @@ export interface SimBundleOptions { // all fields are optional
 }
 
 /**
- * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`)
+ * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`).
 */
 export interface IMatchmakerEvent {
     /** Transaction or Bundle hash. */
