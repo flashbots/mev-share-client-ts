@@ -7,8 +7,8 @@ export class PendingTransaction implements IPendingTransaction {
     to?: string
     functionSelector?: string
     callData?: string
-    mevGasPrice?: BigInt
-    gasUsed?: BigInt
+    mevGasPrice?: bigint
+    gasUsed?: bigint
 
     constructor(event: IMatchmakerEvent) {
         this.hash = event.hash
@@ -25,8 +25,8 @@ export class PendingBundle implements IPendingBundle {
     hash: string
     logs?: LogParams[]
     txs?: { to?: string, functionSelector?: string, callData?: string }[]
-    mevGasPrice?: BigInt
-    gasUsed?: BigInt
+    mevGasPrice?: bigint
+    gasUsed?: bigint
 
     constructor(event: IMatchmakerEvent) {
         this.hash = event.hash

@@ -117,7 +117,7 @@ export interface SimBundleOptions {
     /** default = parentBlock.gasLimit */
     gasLimit?: number,
     /** default = parentBlock.baseFeePerGas */
-    baseFee?: BigInt,
+    baseFee?: bigint,
     /** default = 5 seconds */
     timeout?: number,
 }
@@ -146,11 +146,11 @@ export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 't
     to?: string,
     functionSelector?: string,
     callData?: string,
-    mevGasPrice?: BigInt,
-    gasUsed?: BigInt,
+    mevGasPrice?: bigint,
+    gasUsed?: bigint,
 }
 
 export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
-    mevGasPrice?: BigInt,
-    gasUsed?: BigInt,
+    mevGasPrice?: bigint,
+    gasUsed?: bigint,
 }
