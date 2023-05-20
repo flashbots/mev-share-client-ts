@@ -4,7 +4,7 @@ import EventSource from "eventsource"
 import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle, SimBundleOptions } from './api/interfaces'
+import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle, SimBundleOptions, SimBundleResult, ISimBundleResult, ISendBundleResult, SendBundleResult } from './api/interfaces'
 import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
@@ -137,16 +137,15 @@ export default class Matchmaker {
      * @param params Parameters for the bundle.
      * @returns Array of bundle hashes.
      */
-    public async sendBundle(params: BundleParams): Promise<{bundleHash: string}> {
-        const mungedParams = mungeBundleParams(params)
-        return await this.handleApiRequest([mungedParams], "mev_sendBundle")
+    public async sendBundle(params: BundleParams): Promise<ISendBundleResult> {
+        return SendBundleResult(await this.handleApiRequest([mungeBundleParams(params)], "mev_sendBundle"))
     }
 
-    private async simBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<any> {
-        return this.handleApiRequest([
+    private async simBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<ISimBundleResult> {
+        return SimBundleResult(await this.handleApiRequest([
             mungeBundleParams(params),
             simOptions ? mungeSimBundleOptions(simOptions) : {}
-        ], "mev_simBundle")
+        ], "mev_simBundle"))
     }
 
     /** Simulates a matched bundle.
@@ -156,7 +155,7 @@ export default class Matchmaker {
      * @param params Parameters for the bundle.
      * @returns Simulation data object.
      */
-    public async simulateBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<any> {
+    public async simulateBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<ISimBundleResult> {
         const firstTx = params.body[0]
         if ('hash' in firstTx) {
             console.log("Transaction hash: " + firstTx.hash + " must appear onchain before simulation is possible, waiting")

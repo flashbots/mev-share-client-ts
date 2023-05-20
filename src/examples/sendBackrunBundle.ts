@@ -1,4 +1,4 @@
-import { JsonRpcProvider, keccak256 } from 'ethers'
+import { JsonRpcProvider, formatEther, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
@@ -86,6 +86,7 @@ const handleBackrun = async (
                 }
                 const simResult = await matchmaker.simulateBundle(bundleParams, simOptions)
                 console.log(`simResult (simOptions=${JSON.stringify(simOptions, null, 2)})`, simResult)
+                console.log(`profit: ${formatEther(simResult.profit)} ETH`)
                 
                 // release mutex so the main thread can exit
                 pendingMutex.release()

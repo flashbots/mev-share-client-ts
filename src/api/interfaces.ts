@@ -97,6 +97,24 @@ export interface BundleParams {
     }
 }
 
+/** Response received from matchmaker API */
+interface ISendBundleResponse {
+    /** Bundle hash. */
+    bundleHash: string,
+}
+
+/** Bundle details. */
+export interface ISendBundleResult {
+    /** Bundle hash. */
+    bundleHash: string,
+}
+
+/** Decodes a raw sendBundle response. */
+export const SendBundleResult = (response: ISendBundleResponse): ISendBundleResult => ({
+    bundleHash: response.bundleHash,
+})
+
+/** Optional fields to override simulation state. */
 export interface SimBundleOptions {
     /** Block used for simulation state. Defaults to latest block.
      *
@@ -121,6 +139,48 @@ export interface SimBundleOptions {
     /** default = 5 seconds */
     timeout?: number,
 }
+
+/** Logs returned by mev_simBundle. */
+export interface SimBundleLogs {
+    txLogs?: LogParams[],
+    bundleLogs?: SimBundleLogs[],
+}
+
+/** Response received from matchmaker api. */
+interface ISimBundleResponse {
+    success: boolean,
+    error?: string,
+    stateBlock: string,
+    mevGasPrice: string,
+    profit: string,
+    refundableValue: string,
+    gasUsed: string,
+    logs?: SimBundleLogs[],
+}
+
+/** Simulation details. */
+export interface ISimBundleResult {
+    success: boolean,
+    error?: string,
+    stateBlock: number,
+    mevGasPrice: bigint,
+    profit: bigint,
+    refundableValue: bigint,
+    gasUsed: bigint,
+    logs?: SimBundleLogs[],
+}
+
+/** Decodes a raw simBundle response. */
+export const SimBundleResult = (response: ISimBundleResponse): ISimBundleResult => ({
+    success: response.success,
+    error: response.error,
+    stateBlock: parseInt(response.stateBlock, 16),
+    mevGasPrice: BigInt(response.mevGasPrice),
+    profit: BigInt(response.profit),
+    refundableValue: BigInt(response.refundableValue),
+    gasUsed: BigInt(response.gasUsed),
+    logs: response.logs,
+})
 
 /**
  * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`).
