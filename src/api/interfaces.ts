@@ -200,19 +200,44 @@ export interface IMatchmakerEvent {
         /** Calldata of the tx */
         callData?: string,
     }>,
+    /**
+     * Change in coinbase value after inserting tx/bundle, divided by gas used.
+     *
+     * Can be used to determine the minimum payment to the builder to make your backrun look more profitable to builders.
+     * _Note: this only applies to builders like Flashbots who order bundles by MEV gas price._
+     */
     mevGasPrice?: string,   // hex string
+    /** Gas used by the tx/bundle, rounded up to 2 most significant digits.
+     *
+     * _Note: EXPERIMENTAL; only implemented on Goerli_ */
     gasUsed?: string,       // hex string
 }
 
+/**
+ * Pending transaction from the matchmaker stream.
+ */
 export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 'txs'>, 'mevGasPrice'>, 'gasUsed'> {
     to?: string,
     functionSelector?: string,
     callData?: string,
+    /**
+     * {@inheritDoc IMatchmakerEvent.mevGasPrice}
+     */
     mevGasPrice?: bigint,
+    /**
+     * {@inheritDoc IMatchmakerEvent.gasUsed}
+     */
     gasUsed?: bigint,
 }
 
+/** Pending bundle from the matchmaker stream. */
 export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
+    /**
+     * {@inheritDoc IMatchmakerEvent.mevGasPrice}
+     */
     mevGasPrice?: bigint,
+    /**
+     * {@inheritDoc IMatchmakerEvent.gasUsed}
+     */
     gasUsed?: bigint,
 }
