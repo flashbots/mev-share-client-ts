@@ -4,8 +4,8 @@ import EventSource from "eventsource"
 import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 
 import { getRpcRequest, JsonRpcData } from './flashbots';
-import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle } from './api/interfaces'
-import { mungeBundleParams, mungePrivateTxParams } from "./api/mungers"
+import { BundleParams, MatchmakerNetwork, TransactionOptions, StreamEvent, IMatchmakerEvent, IPendingTransaction, IPendingBundle, SimBundleOptions } from './api/interfaces'
+import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
 
@@ -40,7 +40,7 @@ export default class Matchmaker {
      * @param method JSON-RPC method.
      * @returns Response data from the API request.
      */
-    private async handleApiRequest(params: any, method: any): Promise<any> {
+    private async handleApiRequest(params: Array<any>, method: any): Promise<any> {
         const {body, headers} = await getRpcRequest(params, method, this.authSigner)
         try {
             const res = await axios.post(this.network.apiUrl, body, {
@@ -139,7 +139,14 @@ export default class Matchmaker {
      */
     public async sendBundle(params: BundleParams): Promise<{bundleHash: string}> {
         const mungedParams = mungeBundleParams(params)
-        return await this.handleApiRequest(mungedParams, "mev_sendBundle")
+        return await this.handleApiRequest([mungedParams], "mev_sendBundle")
+    }
+
+    private async simBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<any> {
+        return this.handleApiRequest([
+            mungeBundleParams(params),
+            simOptions ? mungeSimBundleOptions(simOptions) : {}
+        ], "mev_simBundle")
     }
 
     /** Simulates a matched bundle.
@@ -149,7 +156,7 @@ export default class Matchmaker {
      * @param params Parameters for the bundle.
      * @returns Simulation data object.
      */
-    public async simulateBundle(params: BundleParams): Promise<any> {
+    public async simulateBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<any> {
         const firstTx = params.body[0]
         if ('hash' in firstTx) {
             console.log("Transaction hash: " + firstTx.hash + " must appear onchain before simulation is possible, waiting")
@@ -163,7 +170,7 @@ export default class Matchmaker {
                     if (tx) {
                         provider.removeListener('block', waitForTx)
                         const signedTx = Transaction.from(tx).serialized
-                        console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number:${ blockNumber }`)
+                        console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number:${ tx.blockNumber }`)
                         // TODO: Add params.inclusion.block target to mev_simBundle, not currently implemented in API
                         const paramsWithSignedTx = {
                             ...params,
@@ -174,7 +181,7 @@ export default class Matchmaker {
                                 ...params.body.slice(1),
                             ]
                         }
-                        resolve(this.handleApiRequest(mungeBundleParams(paramsWithSignedTx), "mev_simBundle"))
+                        resolve(this.simBundle(paramsWithSignedTx, simOptions))
                     }
                 }
                 provider.on('block', waitForTx)
@@ -187,6 +194,6 @@ export default class Matchmaker {
             })
 
         }
-        return await this.handleApiRequest(mungeBundleParams(params), "mev_simBundle")
+        return await this.simBundle(params, simOptions)
     }
 }
