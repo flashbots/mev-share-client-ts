@@ -39,13 +39,14 @@ export interface HintPreferences {
 }
 
 /**
- * Parameters accepted by the `sendShareTransaction` function.
+ * Parameters accepted by the `sendTransaction` function.
  */
 export interface TransactionOptions {
     /** Hints define what data about a transaction is shared with searchers. */
     hints?: HintPreferences,
     /** Maximum block number for the transaction to be included in. */
     maxBlockNumber?: number,
+    builders?: string[],
 }
 
 /**
@@ -89,11 +90,36 @@ export interface BundleParams {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints?: HintPreferences,
         /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
-        targetBuilders?: Array<string>,
+        builders?: Array<string>,
     },
     metadata?: {
         originId?: string,
     }
+}
+
+export interface SimBundleOptions { // all fields are optional
+    /** Block used for simulation state. Defaults to latest block.
+     *
+     * Block header data will be derived from parent block by default.
+     * Specify other params in this interface to override the default values.
+     *
+     * Can be a block number or block hash.
+    */
+    parentBlock?: number | string,
+
+    // override the default values for the parentBlock header
+    /** default = parentBlock.number + 1 */
+    blockNumber?: number,
+    /** default = parentBlock.coinbase */
+    coinbase?: string,
+    /** default = parentBlock.timestamp + 12 */
+    timestamp?: number,
+    /** default = parentBlock.gasLimit */
+    gasLimit?: number,
+    /** default = parentBlock.baseFeePerGas */
+    baseFee?: BigInt,
+    /** default = 5 seconds */
+    timeout?: number,
 }
 
 /**
