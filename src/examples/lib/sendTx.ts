@@ -34,8 +34,7 @@ export const sendTx = async (
     tip?: BigInt,
 ) => {
     const {matchmaker, signedTx} = await setupTxExample(provider, tip)
-    const res = await matchmaker.sendTransaction(signedTx,
+    return await matchmaker.sendTransaction(signedTx,
         {hints, maxBlockNumber}
     )
-    console.debug("sent tx", res)
 }
