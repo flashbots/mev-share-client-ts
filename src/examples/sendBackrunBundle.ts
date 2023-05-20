@@ -46,6 +46,7 @@ const handleBackrun = async (
     pendingTxHashes: string[],
 ): Promise<string[]> => {
     if (!pendingTxHashes.includes(pendingTx.hash)) {
+        // ignore txs we didn't send. they break the bundle (nonce error) bc we're using one account to do everything
         return pendingTxHashes
     } else {
         console.log("pending tx", pendingTx)
@@ -62,16 +63,12 @@ const handleBackrun = async (
         const currentBlock = targetBlock + i
         if (!pendingMutex.isLocked()) {
             // mutex was released by another handler, so we can exit
-            console.log("mutex unlocked, exiting")
             break
-        } else {
-            console.log("mutex locked, continuing")
         }
         console.log(`tx ${pendingTx.hash} waiting for block`, currentBlock)
         // stall until target block is available
         while (await provider.getBlockNumber() < currentBlock) {
             await new Promise(resolve => setTimeout(resolve, 6000))
-            console.log("beep")
         }
 
         // check for inclusion of backrun tx in target block
@@ -85,14 +82,12 @@ const handleBackrun = async (
                 // simulate for funzies
                 const simOptions = {
                     parentBlock: receipt.blockNumber - 1,
-                    block: receipt.blockNumber,
                 }
                 const simResult = await matchmaker.simulateBundle(bundleParams, simOptions)
                 console.log(`simResult (simOptions=${JSON.stringify(simOptions, null, 2)})`, simResult)
                 
                 // release mutex so the main thread can exit
                 pendingMutex.release()
-                console.log("mutex released, exiting")
                 break
             } else {
                 console.warn(`backrun tx ${checkTxHash} not included in block ${currentBlock}`)
@@ -130,8 +125,6 @@ const main = async () => {
             const res = await sendTx(provider, {logs: true, contractAddress: true, calldata: true, functionSelector: true}, blockNum + NUM_TARGET_BLOCKS)
             console.log("sent tx", res)
             pendingTxHashes.push(res)
-        } else {
-            console.log("waiting for tx to be included...", pendingTxHashes)
         }
     })
 
