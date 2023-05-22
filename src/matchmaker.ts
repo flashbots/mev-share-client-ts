@@ -168,7 +168,8 @@ export default class Matchmaker {
      * Note: This may only be used on matched bundles.
      * Simulating unmatched bundles (i.e. bundles with a hash present) will throw an error.
      * @param params Parameters for the bundle.
-     * @returns Simulation data object.
+     * @param simOptions Simulation options; override block header data for simulation.
+     * @returns Simulation result.
      */
     public async simulateBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<ISimBundleResult> {
         const firstTx = params.body[0]
