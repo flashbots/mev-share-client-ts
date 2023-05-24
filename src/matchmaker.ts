@@ -35,14 +35,17 @@ export default class Matchmaker {
         this.network = network
     }
 
+    /** Connect to Flashbots Mainnet Matchmaker. */
     static useEthereumMainnet(authSigner: Wallet): Matchmaker {
         return new Matchmaker(authSigner, SupportedNetworks.mainnet)
     }
 
+    /** Connect to Flashbots Goerli Matchmaker. */
     static useEthereumGoerli(authSigner: Wallet): Matchmaker {
         return new Matchmaker(authSigner, SupportedNetworks.goerli)
     }
 
+    /** Connect to supported networks by specifying a network with a `chainId`. */
     static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): Matchmaker {
         const network = SupportedNetworks.getNetwork(chainId)
         return new Matchmaker(authSigner, network)
@@ -156,6 +159,15 @@ export default class Matchmaker {
         return SendBundleResult(await this.handleApiRequest([mungeBundleParams(params)], "mev_sendBundle"))
     }
 
+    /**
+     * Internal mev_simBundle call.
+     *
+     * Note: This may only be used on matched bundles.
+     * Simulating unmatched bundles (i.e. bundles with a hash present) will throw an error.
+     * @param params - Parameters for the bundle.
+     * @param simOptions - Simulation options; override block header data for simulation.
+     * @returns Simulation result.
+     */
     private async simBundle(params: BundleParams, simOptions?: SimBundleOptions): Promise<ISimBundleResult> {
         return SimBundleResult(await this.handleApiRequest([
             mungeBundleParams(params),
@@ -163,10 +175,7 @@ export default class Matchmaker {
         ], "mev_simBundle"))
     }
 
-    /** Simulates a matched bundle.
-     *
-     * Note: This may only be used on matched bundles.
-     * Simulating unmatched bundles (i.e. bundles with a hash present) will throw an error.
+    /** Simulates a bundle.
      * @param params - Parameters for the bundle.
      * @param simOptions - Simulation options; override block header data for simulation.
      * @returns Simulation result.
