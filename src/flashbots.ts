@@ -9,9 +9,9 @@ export type JsonRpcData = {
 
 /**
  * Standardized RPC request for talking to Bundle API (mev-geth/mev-share) directly.
- * @param params JSON data params
- * @param method JSON-RPC method
- * @param authSigner Wallet used to sign Flashbots auth header; for reputation
+ * @param params - JSON data params
+ * @param method - JSON-RPC method
+ * @param authSigner - Wallet used to sign Flashbots auth header; for reputation
  * @returns Parameters of payload to send to Bundle API
  */
 export const getRpcRequest = async (params: any, method: string, authSigner: Wallet) => {

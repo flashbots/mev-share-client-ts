@@ -2,7 +2,7 @@ import { BundleParams, HintPreferences, SimBundleOptions, TransactionOptions } f
 
 /**
  * Convert name format of user-specified hints for Matchmaker API requests.
- * @param hints Hints specified by the user.
+ * @param hints - Hints specified by the user.
  */
 const mungeHintPreferences = (hints: HintPreferences) => {
     return {
@@ -17,7 +17,7 @@ const mungeHintPreferences = (hints: HintPreferences) => {
 
 /**
  * Converts user-specified hints into the array format accepted by the API.
- * @param hints Hints specified by the user.
+ * @param hints - Hints specified by the user.
  */
 const extractSpecifiedHints = (hints: HintPreferences): string[] => {
     return Object.entries(mungeHintPreferences(hints))
@@ -27,8 +27,8 @@ const extractSpecifiedHints = (hints: HintPreferences): string[] => {
 
 /**
  * Converts user-specified parameters into parameters for a sendPrivateTransaction call to the Matchmaker API.
- * @param signedTx Signed transaction to send.
- * @param options Privacy/execution settings for the transaction.
+ * @param signedTx - Signed transaction to send.
+ * @param options - Privacy/execution settings for the transaction.
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */
 export function mungePrivateTxParams(signedTx: string, options?: TransactionOptions) {
@@ -48,7 +48,7 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
 
 /**
  * Converts user-specified parameters into parameters for a mev_sendBundle call to the Matchmaker API.
- * @param params Privacy/execution parameters for the bundle
+ * @param params - Privacy/execution parameters for the bundle
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */
 export function mungeBundleParams(params: BundleParams) {
@@ -75,6 +75,7 @@ export function mungeBundleParams(params: BundleParams) {
     }
 }
 
+/** Convert SimBundleOptions into format required by eth_simBundle.  */
 export function mungeSimBundleOptions(params: SimBundleOptions) {
     return {
         ...params,
