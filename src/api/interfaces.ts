@@ -8,6 +8,8 @@ export enum StreamEvent {
     Transaction = 'transaction',
 }
 
+export type StreamEventName = `${StreamEvent}`
+
 /**
  * Configuration used to connect to the Matchmaker.
  *
@@ -39,13 +41,14 @@ export interface HintPreferences {
 }
 
 /**
- * Parameters accepted by the `sendShareTransaction` function.
+ * Parameters accepted by the `sendTransaction` function.
  */
 export interface TransactionOptions {
     /** Hints define what data about a transaction is shared with searchers. */
     hints?: HintPreferences,
     /** Maximum block number for the transaction to be included in. */
     maxBlockNumber?: number,
+    builders?: string[],
 }
 
 /**
@@ -89,15 +92,100 @@ export interface BundleParams {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints?: HintPreferences,
         /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
-        targetBuilders?: Array<string>,
+        builders?: Array<string>,
     },
     metadata?: {
         originId?: string,
     }
 }
 
+/** Response received from matchmaker API */
+interface ISendBundleResponse {
+    /** Bundle hash. */
+    bundleHash: string,
+}
+
+/** Bundle details. */
+export interface ISendBundleResult {
+    /** Bundle hash. */
+    bundleHash: string,
+}
+
+/** Decodes a raw sendBundle response. */
+export const SendBundleResult = (response: ISendBundleResponse): ISendBundleResult => ({
+    bundleHash: response.bundleHash,
+})
+
+/** Optional fields to override simulation state. */
+export interface SimBundleOptions {
+    /** Block used for simulation state. Defaults to latest block.
+     *
+     * Block header data will be derived from parent block by default.
+     * Specify other params in this interface to override the default values.
+     *
+     * Can be a block number or block hash.
+    */
+    parentBlock?: number | string,
+
+    // override the default values for the parentBlock header
+    /** default = parentBlock.number + 1 */
+    blockNumber?: number,
+    /** default = parentBlock.coinbase */
+    coinbase?: string,
+    /** default = parentBlock.timestamp + 12 */
+    timestamp?: number,
+    /** default = parentBlock.gasLimit */
+    gasLimit?: number,
+    /** default = parentBlock.baseFeePerGas */
+    baseFee?: bigint,
+    /** default = 5 (defined in seconds) */
+    timeout?: number,
+}
+
+/** Logs returned by mev_simBundle. */
+export interface SimBundleLogs {
+    txLogs?: LogParams[],
+    bundleLogs?: SimBundleLogs[],
+}
+
+/** Response received from matchmaker api. */
+interface ISimBundleResponse {
+    success: boolean,
+    error?: string,
+    stateBlock: string,
+    mevGasPrice: string,
+    profit: string,
+    refundableValue: string,
+    gasUsed: string,
+    logs?: SimBundleLogs[],
+}
+
+/** Simulation details. */
+export interface ISimBundleResult {
+    success: boolean,
+    error?: string,
+    stateBlock: number,
+    mevGasPrice: bigint,
+    profit: bigint,
+    refundableValue: bigint,
+    gasUsed: bigint,
+    logs?: SimBundleLogs[],
+}
+
+/** Decodes a raw simBundle response. */
+export const SimBundleResult = (response: ISimBundleResponse): ISimBundleResult => ({
+    success: response.success,
+    error: response.error,
+    stateBlock: parseInt(response.stateBlock, 16),
+    mevGasPrice: BigInt(response.mevGasPrice),
+    profit: BigInt(response.profit),
+    refundableValue: BigInt(response.refundableValue),
+    gasUsed: BigInt(response.gasUsed),
+    logs: response.logs,
+})
+
 /**
- * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`)
+ * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`).
 */
 export interface IMatchmakerEvent {
     /** Transaction or Bundle hash. */
@@ -111,13 +199,45 @@ export interface IMatchmakerEvent {
         functionSelector?: string,
         /** Calldata of the tx */
         callData?: string,
-    }>
+    }>,
+    /**
+     * Change in coinbase value after inserting tx/bundle, divided by gas used.
+     *
+     * Can be used to determine the minimum payment to the builder to make your backrun look more profitable to builders.
+     * _Note: this only applies to builders like Flashbots who order bundles by MEV gas price._
+     */
+    mevGasPrice?: string,   // hex string
+    /** Gas used by the tx/bundle, rounded up to 2 most significant digits.
+     *
+     * _Note: EXPERIMENTAL; only implemented on Goerli_ */
+    gasUsed?: string,       // hex string
 }
 
-export interface IPendingTransaction extends Omit<IMatchmakerEvent, 'txs'> {
+/**
+ * Pending transaction from the matchmaker stream.
+ */
+export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 'txs'>, 'mevGasPrice'>, 'gasUsed'> {
     to?: string,
     functionSelector?: string,
     callData?: string,
+    /**
+     * {@link IMatchmakerEvent.mevGasPrice}
+     */
+    mevGasPrice?: bigint,
+    /**
+     * {@link IMatchmakerEvent.gasUsed}
+     */
+    gasUsed?: bigint,
 }
 
-export type IPendingBundle = IMatchmakerEvent
+/** Pending bundle from the matchmaker stream. */
+export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
+    /**
+     * {@link IMatchmakerEvent.mevGasPrice}
+     */
+    mevGasPrice?: bigint,
+    /**
+     * {@link IMatchmakerEvent.gasUsed}
+     */
+    gasUsed?: bigint,
+}

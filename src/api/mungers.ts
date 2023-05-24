@@ -1,8 +1,8 @@
-import { BundleParams, HintPreferences, TransactionOptions } from './interfaces'
+import { BundleParams, HintPreferences, SimBundleOptions, TransactionOptions } from './interfaces'
 
 /**
  * Convert name format of user-specified hints for Matchmaker API requests.
- * @param hints Hints specified by the user.
+ * @param hints - Hints specified by the user.
  */
 const mungeHintPreferences = (hints: HintPreferences) => {
     return {
@@ -17,7 +17,7 @@ const mungeHintPreferences = (hints: HintPreferences) => {
 
 /**
  * Converts user-specified hints into the array format accepted by the API.
- * @param hints Hints specified by the user.
+ * @param hints - Hints specified by the user.
  */
 const extractSpecifiedHints = (hints: HintPreferences): string[] => {
     return Object.entries(mungeHintPreferences(hints))
@@ -27,8 +27,8 @@ const extractSpecifiedHints = (hints: HintPreferences): string[] => {
 
 /**
  * Converts user-specified parameters into parameters for a sendPrivateTransaction call to the Matchmaker API.
- * @param signedTx Signed transaction to send.
- * @param options Privacy/execution settings for the transaction.
+ * @param signedTx - Signed transaction to send.
+ * @param options - Privacy/execution settings for the transaction.
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */
 export function mungePrivateTxParams(signedTx: string, options?: TransactionOptions) {
@@ -37,27 +37,28 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
         maxBlockNumber: options?.maxBlockNumber && `0x${options.maxBlockNumber.toString(16)}`,
         preferences: {
             fast: true, // deprecated but required; setting has no effect
-            // auction uses default (Stable) config if no hints specified
-            auction: options?.hints && {
-                hint: extractSpecifiedHints(options.hints),
+            // privacy uses default (Stable) config if no hints specified
+            privacy: options?.hints && {
+                hints: extractSpecifiedHints(options.hints),
             },
+            builders: options?.builders,
         },
     }]
 }
 
 /**
  * Converts user-specified parameters into parameters for a mev_sendBundle call to the Matchmaker API.
- * @param params Privacy/execution parameters for the bundle
+ * @param params - Privacy/execution parameters for the bundle
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */
 export function mungeBundleParams(params: BundleParams) {
     type AnyBundleItem = {hash?: string, tx?: string, bundle?: any, canRevert?: boolean}
     // recursively munge nested bundle params
     const mungedBundle: any[] = params.body.map((i: AnyBundleItem) => i.bundle ? mungeBundleParams(i.bundle) : i)
-    return [{
+    return {
         ...params,
         body: mungedBundle,
-        version: params.version || "beta-1", // default latest
+        version: params.version || "v0.1",
         inclusion: {
             ...params.inclusion,
             block: `0x${params.inclusion.block.toString(16)}`,
@@ -71,5 +72,18 @@ export function mungeBundleParams(params: BundleParams) {
             ...params.privacy,
             hints: params.privacy.hints && extractSpecifiedHints(params.privacy.hints),
         }
-    }]
+    }
+}
+
+/** Convert SimBundleOptions into format required by eth_simBundle.  */
+export function mungeSimBundleOptions(params: SimBundleOptions) {
+    return {
+        ...params,
+        // coinbase & timeout can be left as they are
+        parentBlock: params.parentBlock && `0x${BigInt(params.parentBlock).toString(16)}`,
+        blockNumber: params.blockNumber && `0x${BigInt(params.blockNumber).toString(16)}`,
+        timestamp: params.timestamp && `0x${BigInt(params.timestamp).toString(16)}`,
+        gasLimit: params.gasLimit && `0x${BigInt(params.gasLimit).toString(16)}`,
+        baseFee: params.baseFee && `0x${params.baseFee.toString(16)}`,
+    }
 }

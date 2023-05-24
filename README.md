@@ -22,6 +22,11 @@ cd matchmaker-ts
 yarn install && yarn build
 ```
 
+```sh
+# in your project, assuming it has the same parent directory as matchmaker-ts
+yarn add ../matchmaker-ts
+```
+
 ### use matchmaker in your project
 
 > :warning: Variables denoted in `ALL_CAPS` are placeholders; the code does not compile. [examples/](#examples) contains compilable demos.
@@ -35,7 +40,6 @@ import Matchmaker, {
     HintPreferences,
     IPendingBundle,
     IPendingTransaction,
-    StreamEvent,
     TransactionOptions
 } from "@flashbots/matchmaker-ts"
 
@@ -62,15 +66,17 @@ const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
 Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a Matchmaker using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
 
 ```typescript
-import { JsonRpcProvider } from "ethers" // ethers v6
+import { JsonRpcProvider, Wallet } from "ethers" // ethers v6
 
 /** connects to Flashbots matchmaker on goerli */
-function connectMatchmaker(provider: JsonRpcProvider) {
-    return Matchmaker.fromNetwork(provider._network)
-}
+const provider = new JsonRpcProvider("http://localhost:8545", {chainId: 5, name: "goerli"})
+const authSigner = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+    .connect(provider)
+
+const matchmaker = Matchmaker.fromNetwork(authSigner, provider._network)
 
 // manually with a chainId:
-const matchmaker = Matchmaker.fromNetwork({chainId: 5})
+const matchmaker = Matchmaker.fromNetwork(authSigner, {chainId: 5})
 ```
 
 #### Connect to a custom network
@@ -125,11 +131,11 @@ See [src/api/interfaces.ts](src/api/interfaces.ts) for interface definitions.
 Use `on` to start listening for events on mev-share. The function registers the provided callback to be called when a new event is detected.
 
 ```typescript
-const handler = matchmaker.on(StreamEvent.Transaction, (tx: IPendingTransaction) => {
+const handler = matchmaker.on("transaction", (tx: IPendingTransaction) => {
     // handle pending tx
 })
 
-// before terminating program
+// ... before terminating program
 handler.close()
 ```
 
@@ -138,6 +144,19 @@ handler.close()
 Sends a private transaction to the Flashbots Matchmaker with specified hint parameters.
 
 ```typescript
+const wallet = new Wallet(PRIVATE_KEY)
+const tx = {
+    to: "0xfb000000387627910184cc42fc92995913806333",
+    value: BigInt(1e13 * 275), // price of a beer if ETH is $2000
+    data: "0x646f637320626179626565652121",
+    gasLimit: 42000,
+    maxFeePerGas: BigInt(1e9) * BigInt(42), // 42 gwei / gas
+    maxPriorityFeePerGas: BigInt(1e9) * BigInt(2), // 2 gwei / gas
+    chainId: 5,
+    type: 2,
+}
+
+// privacy & inclusion settings
 const shareTxParams: TransactionOptions = {
     hints: {
         logs: true,
@@ -146,7 +165,10 @@ const shareTxParams: TransactionOptions = {
         contractAddress: true,
     },
     maxBlockNumber: undefined,
+    builders: ["flashbots"]
 }
+
+const signedTx = await wallet.signTransaction(tx)
 await matchmaker.sendTransaction(SIGNED_TX, shareTxParams)
 ```
 
@@ -177,8 +199,46 @@ const bundleParams: BundleParams = {
             functionSelector: true,
             contractAddress: true,
         },
-        targetBuilders: ["all"]
+        // builders: ["flashbots"]
     }
 }
 await matchmaker.sendBundle(bundleParams)
 ```
+
+### `simulateBundle`
+
+Simulates a bundle. Accepts options to modify block header for simulation.
+
+```typescript
+const bundle: BundleParams = {
+    inclusion: {
+        block: TARGET_BLOCK,
+        maxBlock: TARGET_BLOCK + 3,
+    },
+    body: [
+        {hash: "0xTARGET_TX_HASH"},
+        {tx: "0xSIGNED_BACKRUN_TX", canRevert: false}
+    ],
+    // ...
+}
+
+// ...
+// assume you sent the bundle and it didn't land, and you want to see if it would have landed in the previous block, but need the tx to think it's in the target block
+
+const simBundleOptions: SimBundleOptions = {
+    parentBlock: TARGET_BLOCK - 1,
+    blockNumber: TARGET_BLOCK,
+    /*
+    Set any of these (block header) fields to override their respective values in the simulation context: 
+    */
+    // coinbase: string,
+    // timestamp: number,
+    // gasLimit: number,
+    // baseFee: bigint,
+    // timeout: number,
+}
+
+const simResult = await matchmaker.simulateBundle(bundle, simBundleOptions)
+```
+
+This example uses the state of `parentBlock`, but overrides the state's `blockNumber` value. Setting more fields in `SimBundleOptions` is useful when testing smart contracts which have specific criteria that must be met, like the block being a certain number, or a specific timestamp having passed.

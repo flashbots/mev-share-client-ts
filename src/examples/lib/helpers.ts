@@ -7,16 +7,13 @@ export function getProvider() {
 }
 
 export async function initExample(provider: JsonRpcProvider) {
-    const authSigner = new Wallet(Env.authKey)
-    const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
-    const wallet = new Wallet(Env.senderKey)
-    const feeData = await provider.getFeeData()
+    const authSigner = new Wallet(Env.authKey).connect(provider)
 
     return {
         provider,
-        wallet: wallet.connect(provider),
-        authSigner: authSigner.connect(provider),
-        matchmaker,
-        feeData,
+        wallet: new Wallet(Env.senderKey).connect(provider),
+        authSigner,
+        matchmaker: Matchmaker.useEthereumGoerli(authSigner),
+        feeData: await provider.getFeeData(),
     }
 }
