@@ -175,7 +175,9 @@ export default class Matchmaker {
         ], "mev_simBundle"))
     }
 
-    /** Simulates a bundle.
+    /** Simulates a bundle. 
+     * 
+     * Bundles containing pending transactions (specified by `{hash}` instead of `{tx}`) may only be simulated after those transactions have landed on chain.
      * @param params - Parameters for the bundle.
      * @param simOptions - Simulation options; override block header data for simulation.
      * @returns Simulation result.
