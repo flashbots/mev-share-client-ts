@@ -200,7 +200,7 @@ export default class Matchmaker {
                         const signedTx = Transaction.from(tx).serialized
                         console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number: ${ tx.blockNumber }`)
                         if (!tx.blockNumber) {
-                            return reject(new Error("Transaction hash: " + firstTx.hash + " did not appear onchain before TIMEOUT_QUERY_TX_MS"))
+                            return reject(new Error("Transaction hash: " + firstTx.hash + " does not have blockNumber"))
                         }
                         const simBlock = simOptions?.parentBlock || tx.blockNumber - 1
                         const paramsWithSignedTx = {
