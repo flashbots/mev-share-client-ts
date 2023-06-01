@@ -212,6 +212,8 @@ export default class Matchmaker {
                         resolve(this.simBundle(paramsWithSignedTx, simOptions))
                     }
                 }
+                // manually call once in case tx is already landed
+                waitForTx()
                 provider.on('block', waitForTx)
                 setTimeout(() => {
                     provider.removeListener('block', waitForTx)
