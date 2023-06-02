@@ -188,7 +188,7 @@ export default class Matchmaker {
         const firstTx = params.body[0]
         if ('hash' in firstTx) {
             console.log("Transaction hash: " + firstTx.hash + " must appear onchain before simulation is possible, waiting")
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 const provider = this.authSigner.provider
                 if (provider == null) {
                     throw new Error("Need to wait for hash, but we don't have a provider. Attach one to signer wallet")
@@ -210,10 +210,14 @@ export default class Matchmaker {
                             ]
                         }
                         resolve(this.simBundle(paramsWithSignedTx, simOptions))
+                        return true
                     }
+                    return false
                 }
                 // manually call once in case tx is already landed
-                waitForTx()
+                if (await waitForTx()) {
+                    return
+                }
                 provider.on('block', waitForTx)
                 setTimeout(() => {
                     provider.removeListener('block', waitForTx)
