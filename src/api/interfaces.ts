@@ -10,6 +10,7 @@ export enum StreamEvent {
 
 export type StreamEventName = `${StreamEvent}`
 
+/** Data about the event history endpoint. */
 export type EventHistoryInfo = {
     count: number,
     minBlock: number,
@@ -17,6 +18,33 @@ export type EventHistoryInfo = {
     minTimestamp: number,
     maxTimestamp: number,
     maxLimit: number,
+}
+
+/** Arguments for the `getEventHistory` function. */
+export type EventHistoryParams = {
+    blockStart?: number,
+    blockEnd?: number,
+    timestampStart?: number,
+    timestampEnd?: number,
+    limit?: number,
+    offset?: number,
+}
+
+/** Raw data about an event from the getEventHistory function. */
+export type IEventHistoryEntry = {
+    block: number,
+    timestamp: number,
+    hint: {
+        txs?: Array<{
+            to: string,
+            callData: string,
+            functionSelector: string,
+        }>,
+        hash: string,
+        logs?: Array<LogParams>,
+        gasUsed: string,
+        mevGasPrice: string,
+    }
 }
 
 /**

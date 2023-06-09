@@ -18,11 +18,14 @@ import {
     ISendBundleResult,
     SendBundleResult,
     StreamEventName,
-    EventHistoryInfo
+    EventHistoryInfo,
+    EventHistoryParams,
+    IEventHistoryEntry
 } from './api/interfaces'
-import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
+import { EventHistoryEntry, mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
+import { URLSearchParams } from 'url';
 
 // when calling mev_simBundle on a {tx} specified bundle, how long to wait for target to appear onchain
 const TIMEOUT_QUERY_TX_MS = 5 * 60 * 1000
@@ -250,7 +253,13 @@ export default class Matchmaker {
     }
 
     /** Gets past events that were broadcast via the SSE event stream. */
-    public getEventHistory() {
-        //
+    public async getEventHistory(params?: EventHistoryParams): Promise<Array<EventHistoryEntry>> {
+        const _params = params || {}
+        const query = new URLSearchParams()
+        for (const [key, value] of Object.entries(_params)) {
+            query.set(key, value.toString())
+        }
+        const res: Array<IEventHistoryEntry> = await this.streamGet("history" + `?${query.toString()}`)
+        return res.map((entry) => new EventHistoryEntry(entry))
     }
 }
