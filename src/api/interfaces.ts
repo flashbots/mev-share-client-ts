@@ -10,6 +10,15 @@ export enum StreamEvent {
 
 export type StreamEventName = `${StreamEvent}`
 
+export type EventHistoryInfo = {
+    count: number,
+    minBlock: number,
+    maxBlock: number,
+    minTimestamp: number,
+    maxTimestamp: number,
+    maxLimit: number,
+}
+
 /**
  * Configuration used to connect to the Matchmaker.
  *

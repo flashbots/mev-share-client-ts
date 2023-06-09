@@ -17,7 +17,8 @@ import {
     ISimBundleResult,
     ISendBundleResult,
     SendBundleResult,
-    StreamEventName
+    StreamEventName,
+    EventHistoryInfo
 } from './api/interfaces'
 import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
@@ -51,6 +52,32 @@ export default class Matchmaker {
         return new Matchmaker(authSigner, network)
     }
 
+    /** Make an HTTP POST request to a JSON-RPC endpoint.
+     * @param url - URL to send the request to.
+     * @param params - body & headers.
+     * @returns Response data.
+    */
+    private async postRpc(url: string, params: {body?: any, headers?: any}): Promise<any> {
+        const res = await axios.post(url, params.body, {
+            headers: params.headers
+        })
+        const data = res.data as JsonRpcData
+        if (data.error) {
+            throw new JsonRpcError(data.error)
+        }
+        return data.result
+    }
+
+    /** Make an HTTP GET request.
+     * @param url - URL to send the request to.
+     */
+    private async streamGet(urlSuffix: string): Promise<any> {
+        let url = this.network.streamUrl
+        url = url.endsWith("/") ? url : url + "/"
+        const res = await axios.get(url + "api/v1/" + urlSuffix)
+        return res.data
+    }
+
     /**
      * Sends a POST request to the Matchmaker API and returns the data.
      * @param params - JSON-RPC params.
@@ -58,16 +85,8 @@ export default class Matchmaker {
      * @returns Response data from the API request.
      */
     private async handleApiRequest(params: Array<any>, method: any): Promise<any> {
-        const {body, headers} = await getRpcRequest(params, method, this.authSigner)
         try {
-            const res = await axios.post(this.network.apiUrl, body, {
-                headers
-            })
-            const data = res.data as JsonRpcData
-            if (data.error) {
-                throw new JsonRpcError(data.error)
-            }
-            return data.result
+            return this.postRpc(this.network.apiUrl, await getRpcRequest(params, method, this.authSigner))
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new NetworkFailure(e)
@@ -223,5 +242,15 @@ export default class Matchmaker {
 
         }
         return await this.simBundle(params, simOptions)
+    }
+
+    /** Gets information about the event history endpoint, such as (// TODO) */
+    public async getEventHistoryInfo(): Promise<EventHistoryInfo> {
+        return await this.streamGet("history/info")
+    }
+
+    /** Gets past events that were broadcast via the SSE event stream. */
+    public getEventHistory() {
+        //
     }
 }
