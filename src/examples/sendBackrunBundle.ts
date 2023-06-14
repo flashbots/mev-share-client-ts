@@ -30,16 +30,6 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPend
             maxBlock: targetBlock + NUM_TARGET_BLOCKS,
         },
         body: bundle,
-        privacy: {
-            hints: {
-                // txHash: true,
-                calldata: true,
-                logs: true,
-                functionSelector: true,
-                contractAddress: true,
-            },
-            builders: ["flashbots"]
-        }
     }
     const backrunResult = await matchmaker.sendBundle(bundleParams)
     return {

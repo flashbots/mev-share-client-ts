@@ -156,7 +156,6 @@ export default class Matchmaker {
      * @returns Array of bundle hashes.
      */
     public async sendBundle(params: BundleParams): Promise<ISendBundleResult> {
-        console.log("bundleParams", mungeBundleParams(params))
         return SendBundleResult(await this.handleApiRequest([mungeBundleParams(params)], "mev_sendBundle"))
     }
 

@@ -29,6 +29,7 @@
     "test": "echo \"no test specified\" && exit 0",
     "lint": "eslint src/*.ts src/**/*.ts",
     "example.tx": "ts-node src/examples/sendTx.ts",
-    "example.backrun": "ts-node src/examples/sendBackrunBundle.ts"
+    "example.backrun": "ts-node src/examples/sendBackrunBundle.ts",
+    "example.composableBundle": "ts-node src/examples/sendComposableBundle.ts"
   }
 }
