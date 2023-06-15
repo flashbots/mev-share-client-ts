@@ -100,8 +100,8 @@ export class EventHistoryEntry {
         }>,
         hash: string,
         logs?: Array<LogParams>,
-        gasUsed: BigInt,
-        mevGasPrice: BigInt,
+        gasUsed: bigint,
+        mevGasPrice: bigint,
     }
     constructor(entry: IEventHistoryEntry) {
         this.block = entry.block
