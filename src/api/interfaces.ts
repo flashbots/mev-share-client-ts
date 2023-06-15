@@ -38,6 +38,8 @@ export interface HintPreferences {
     functionSelector?: boolean,
     /** Share the logs emitted by the transaction. */
     logs?: boolean,
+    /** Share tx hashes of transactions in bundle. */
+    txHash?: boolean,
 }
 
 /**

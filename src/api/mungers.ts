@@ -10,6 +10,7 @@ const mungeHintPreferences = (hints: HintPreferences) => {
         function_selector: hints.functionSelector,
         calldata: hints.calldata,
         logs: hints.logs,
+        tx_hash: hints.txHash,
         hash: true, // tx hash is always shared on Flashbots Matchmaker; abstract away from user
         // setting all hints except hash to false will enable full privacy
     }

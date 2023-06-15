@@ -46,7 +46,7 @@ const handleBackrun = async (
     pendingMutex: Mutex,
     pendingTxHashes: AsyncArray<string>,
 ): Promise<void> => {
-    pendingTx.mevGasPrice
+    console.log("pendingTxHashes", await pendingTxHashes.get())
     if (!(await pendingTxHashes.includes(pendingTx.hash))) {
         // ignore txs we didn't send. they break the bundle (nonce error) bc we're using one account to do everything
         return
