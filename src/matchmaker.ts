@@ -60,9 +60,9 @@ export default class Matchmaker {
      * @param params - body & headers.
      * @returns Response data.
     */
-    private async postRpc(url: string, params: {body?: any, headers?: any}): Promise<any> {
-        const res = await axios.post(url, params.body, {
-            headers: params.headers
+    private async postRpc(url: string, payload: {body?: any, headers?: any}): Promise<any> {
+        const res = await axios.post(url, payload.body, {
+            headers: payload.headers
         })
         const data = res.data as JsonRpcData
         if (data.error) {
