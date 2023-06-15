@@ -210,7 +210,7 @@ export default class Matchmaker {
         const firstTx = params.body[0]
         if ('hash' in firstTx) {
             console.log("Transaction hash: " + firstTx.hash + " must appear onchain before simulation is possible, waiting")
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 const provider = this.authSigner.provider
                 if (provider == null) {
                     throw new Error("Need to wait for hash, but we don't have a provider. Attach one to signer wallet")
@@ -221,7 +221,10 @@ export default class Matchmaker {
                         provider.removeListener('block', waitForTx)
                         const signedTx = Transaction.from(tx).serialized
                         console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number: ${ tx.blockNumber }`)
-                        // TODO: Add params.inclusion.block target to mev_simBundle, not currently implemented in API
+                        if (!tx.blockNumber) {
+                            return reject(new Error("Transaction hash: " + firstTx.hash + " does not have blockNumber"))
+                        }
+                        const simBlock = simOptions?.parentBlock || tx.blockNumber - 1
                         const paramsWithSignedTx = {
                             ...params,
                             body: [
@@ -229,10 +232,16 @@ export default class Matchmaker {
                                     tx: signedTx, canRevert: false
                                 },
                                 ...params.body.slice(1),
-                            ]
+                            ],
                         }
-                        resolve(this.simBundle(paramsWithSignedTx, simOptions))
+                        resolve(this.simBundle(paramsWithSignedTx, {...simOptions, parentBlock: simBlock}))
+                        return true
                     }
+                    return false
+                }
+                // manually call once in case tx is already landed
+                if (await waitForTx()) {
+                    return
                 }
                 provider.on('block', waitForTx)
                 setTimeout(() => {
