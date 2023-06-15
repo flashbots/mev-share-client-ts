@@ -199,7 +199,10 @@ export default class Matchmaker {
                         provider.removeListener('block', waitForTx)
                         const signedTx = Transaction.from(tx).serialized
                         console.log(`Found transaction hash: ${ firstTx.hash } onchain at block number: ${ tx.blockNumber }`)
-                        // TODO: Add params.inclusion.block target to mev_simBundle, not currently implemented in API
+                        if (!tx.blockNumber) {
+                            return reject(new Error("Transaction hash: " + firstTx.hash + " does not have blockNumber"))
+                        }
+                        const simBlock = simOptions?.parentBlock || tx.blockNumber - 1
                         const paramsWithSignedTx = {
                             ...params,
                             body: [
@@ -207,9 +210,9 @@ export default class Matchmaker {
                                     tx: signedTx, canRevert: false
                                 },
                                 ...params.body.slice(1),
-                            ]
+                            ],
                         }
-                        resolve(this.simBundle(paramsWithSignedTx, simOptions))
+                        resolve(this.simBundle(paramsWithSignedTx, {...simOptions, parentBlock: simBlock}))
                     }
                 }
                 provider.on('block', waitForTx)
