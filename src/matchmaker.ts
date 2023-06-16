@@ -57,7 +57,7 @@ export default class Matchmaker {
 
     /** Make an HTTP POST request to a JSON-RPC endpoint.
      * @param url - URL to send the request to.
-     * @param params - body & headers.
+     * @param payload - body & headers.
      * @returns Response data.
     */
     private async postRpc(url: string, payload: {body?: any, headers?: any}): Promise<any> {
@@ -72,7 +72,7 @@ export default class Matchmaker {
     }
 
     /** Make an HTTP GET request.
-     * @param url - URL to send the request to.
+     * @param urlSuffix - URL to send the request to.
      */
     private async streamGet(urlSuffix: string): Promise<any> {
         let url = this.network.streamUrl
