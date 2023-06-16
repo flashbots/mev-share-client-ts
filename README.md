@@ -179,30 +179,43 @@ Sends a bundle; an array of transactions with parameters to specify conditions f
 See [MEV-Share Docs](https://github.com/flashbots/mev-share/blob/main/src/mev_sendBundle.md) for detailed descriptions of these parameters.
 
 ```typescript
+const targetBlock = 1 + await provider.getBlockNumber()
 const bundleParams: BundleParams = {
     inclusion: {
-        block: TARGET_BLOCK,
+        block: targetBlock,
     },
     body: [
         {hash: TX_HASH_FROM_EVENT_STREAM},
         {tx: SIGNED_TX, canRevert: false},
     ],
-    validity: {
-        refund: [
-            {address: SEARCHER_ADDRESS, percent: 10}
-        ]
+}
+await matchmaker.sendBundle(bundleParams)
+```
+
+Bundles that _only_ contain signed transactions can share hints about the transactions in their bundle by setting the `privacy` parameter:
+
+```typescript
+const targetBlock = 1 + await provider.getBlockNumber()
+const bundleParams: BundleParams = {
+    inclusion: {
+        block: targetBlock,
+        maxBlock: targetBlock + 5, // allow bundle to land in next 5 blocks
     },
+    body: [
+        {tx: await wallet.signTransaction(TX1), canRevert: false},
+        {tx: await wallet.signTransaction(TX2), canRevert: false},
+    ],
     privacy: {
         hints: {
-            calldata: false,
-            logs: false,
+            txHash: true,
+            calldata: true,
+            logs: true,
             functionSelector: true,
             contractAddress: true,
         },
-        // builders: ["flashbots"]
     }
 }
-await matchmaker.sendBundle(bundleParams)
+const backrunResult = await matchmaker.sendBundle(bundleParams)
 ```
 
 ### `simulateBundle`
@@ -242,3 +255,57 @@ const simResult = await matchmaker.simulateBundle(bundle, simBundleOptions)
 ```
 
 This example uses the state of `parentBlock`, but overrides the state's `blockNumber` value. Setting more fields in `SimBundleOptions` is useful when testing smart contracts which have specific criteria that must be met, like the block being a certain number, or a specific timestamp having passed.
+
+### `getEventHistoryInfo`
+
+Get information about the event history endpoint for use in [`getEventHistory`](#geteventhistory).
+
+Example:
+
+```typescript
+const info = await matchmaker.getEventHistoryInfo()
+console.log(info)
+```
+
+returns something like this:
+
+```txt
+{
+  count: 56934,
+  minBlock: 9091377,
+  maxBlock: 9190024,
+  minTimestamp: 1685452445,
+  maxTimestamp: 1686943324,
+  maxLimit: 500
+}
+```
+
+### `getEventHistory`
+
+Get historical event stream data.
+
+Using the data from our [`getEventHistoryInfo`](#geteventhistoryinfo) call, we can read events starting from the beginning. The data is paginated, so to read all of it, you'll have to make multiple calls to iterate through the it.
+
+```typescript
+const info = await matchmaker.getEventHistoryInfo()
+
+// read every event
+for (let i = 0; i < Math.ceil(info.count / info.maxLimit); i++) {
+    const events = await matchmaker.getEventHistory({
+        limit: info.maxLimit,
+        offset: i * info.maxLimit,
+        blockStart: info.minBlock,
+    })
+    console.log(events)
+}
+```
+
+You can also filter events by timestamp:
+
+```typescript
+const events = await matchmaker.getEventHistory({
+    limit: info.maxLimit,
+    offset: i * info.maxLimit,
+    timestampStart: 1686942023,
+})
+```
