@@ -1,4 +1,5 @@
-import { BundleParams, HintPreferences, SimBundleOptions, TransactionOptions } from './interfaces'
+import { LogParams } from 'ethers'
+import { BundleParams, HintPreferences, IEventHistoryEntry, SimBundleOptions, TransactionOptions } from './interfaces'
 
 /**
  * Convert name format of user-specified hints for Matchmaker API requests.
@@ -86,5 +87,30 @@ export function mungeSimBundleOptions(params: SimBundleOptions) {
         timestamp: params.timestamp && `0x${BigInt(params.timestamp).toString(16)}`,
         gasLimit: params.gasLimit && `0x${BigInt(params.gasLimit).toString(16)}`,
         baseFee: params.baseFee && `0x${params.baseFee.toString(16)}`,
+    }
+}
+
+export class EventHistoryEntry {
+    public block: number
+    public timestamp: number
+    public hint: {
+        txs?: Array<{
+            to: string,
+            callData: string,
+            functionSelector: string,
+        }>,
+        hash: string,
+        logs?: Array<LogParams>,
+        gasUsed: bigint,
+        mevGasPrice: bigint,
+    }
+    constructor(entry: IEventHistoryEntry) {
+        this.block = entry.block
+        this.timestamp = entry.timestamp
+        this.hint = {
+            ...entry.hint,
+            gasUsed: BigInt(entry.hint.gasUsed),
+            mevGasPrice: BigInt(entry.hint.mevGasPrice),
+        }
     }
 }
