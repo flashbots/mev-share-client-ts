@@ -122,6 +122,14 @@ This example watches the mev-share streaming endpoint for pending mev-share tran
 yarn example.backrun
 ```
 
+#### query event history
+
+This example queries event history, starting from the beginning, until it finds events that share transactions and logs.
+
+```sh
+yarn example.history
+```
+
 ## Usage
 
 See [src/api/interfaces.ts](src/api/interfaces.ts) for interface definitions.

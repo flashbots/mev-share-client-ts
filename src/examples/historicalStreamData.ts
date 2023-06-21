@@ -6,9 +6,6 @@ const main = async () => {
     const info = await matchmaker.getEventHistoryInfo()
     console.log(info)
 
-    info.minBlock
-    info.count
-
     let i = 0
     let done = false
     while (!done) {
