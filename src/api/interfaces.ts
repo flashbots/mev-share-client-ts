@@ -53,10 +53,6 @@ export type IEventHistoryEntry = {
  * Use [supportedNetworks](./networks.ts) for presets.
  */
 export type MatchmakerNetwork = {
-    /** Chain ID of the network. e.g. `1` */
-    chainId: number,
-    /** Lowercase name of network. e.g. "mainnet" */
-    name: string,
     /** Matchmaker event stream URL. */
     streamUrl: string,
     /** Matchmaker bundle & transaction API URL. */
