@@ -300,8 +300,8 @@ export class EventHistoryEntry {
         this.timestamp = entry.timestamp
         this.hint = {
             ...entry.hint,
-            gasUsed: BigInt(entry.hint.gasUsed),
-            mevGasPrice: BigInt(entry.hint.mevGasPrice),
+            gasUsed: entry.hint.gasUsed ? BigInt(entry.hint.gasUsed) : BigInt(0),
+            mevGasPrice: entry.hint.mevGasPrice ? BigInt(entry.hint.mevGasPrice) : BigInt(0),
         }
     }
 }
