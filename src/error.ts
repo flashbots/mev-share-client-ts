@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios'
-import { StreamEvent } from './api/interfaces'
+import { StreamEventType } from './api/interfaces'
 
 class MatchmakerError extends Error {
     constructor(message: string) {
@@ -32,7 +32,7 @@ export class UnimplementedNetwork extends MatchmakerError {
 }
 
 export class UnimplementedStreamEvent extends MatchmakerError {
-    constructor(eventType: StreamEvent) {
+    constructor(eventType: StreamEventType) {
         super(`Unimplemented stream event type: ${eventType.toString()}`)
         this.name = "UnimplementedStreamEvent"
     }

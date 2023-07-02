@@ -1,5 +1,4 @@
-import { LogParams } from 'ethers'
-import { BundleParams, HintPreferences, IEventHistoryEntry, SimBundleOptions, TransactionOptions } from './interfaces'
+import { BundleParams, HintPreferences, SimBundleOptions, TransactionOptions } from './interfaces'
 
 /**
  * Convert name format of user-specified hints for Matchmaker API requests.
