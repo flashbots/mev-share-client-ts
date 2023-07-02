@@ -20,9 +20,10 @@ import {
     StreamEventName,
     EventHistoryInfo,
     EventHistoryParams,
-    IEventHistoryEntry
+    IEventHistoryEntry,
+    EventHistoryEntry
 } from './api/interfaces'
-import { EventHistoryEntry, mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
+import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
 import { URLSearchParams } from 'url';

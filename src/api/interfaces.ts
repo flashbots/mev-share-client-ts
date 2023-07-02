@@ -280,3 +280,28 @@ export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice
      */
     gasUsed?: bigint,
 }
+
+export class EventHistoryEntry {
+    public block: number
+    public timestamp: number
+    public hint: {
+        txs?: Array<{
+            to: string,
+            callData: string,
+            functionSelector: string,
+        }>,
+        hash: string,
+        logs?: Array<LogParams>,
+        gasUsed: bigint,
+        mevGasPrice: bigint,
+    }
+    constructor(entry: IEventHistoryEntry) {
+        this.block = entry.block
+        this.timestamp = entry.timestamp
+        this.hint = {
+            ...entry.hint,
+            gasUsed: BigInt(entry.hint.gasUsed),
+            mevGasPrice: BigInt(entry.hint.mevGasPrice),
+        }
+    }
+}

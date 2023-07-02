@@ -8,7 +8,8 @@ export {
     TransactionOptions,
     StreamEvent,
     EventHistoryInfo,
-    EventHistoryParams
+    EventHistoryParams,
+    EventHistoryEntry,
 } from "./api/interfaces"
 
 export {SupportedNetworks} from "./api/networks"
