@@ -8,7 +8,7 @@ import {
     BundleParams,
     MatchmakerNetwork,
     TransactionOptions,
-    StreamEvent,
+    StreamEventType,
     IMatchmakerEvent,
     IPendingTransaction,
     IPendingBundle,
@@ -137,14 +137,14 @@ export default class Matchmaker {
      * @returns Stream handler. Call `.close()` on it before terminating your program.
      */
     public on(
-        eventType: StreamEvent | StreamEventName,
+        eventType: StreamEventType | StreamEventName,
         callback: (data: IPendingBundle | IPendingTransaction) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)
 
         const eventHandler =
-            eventType === StreamEvent.Transaction ? this.onTransaction :
-            eventType === StreamEvent.Bundle ? this.onBundle :
+            eventType === StreamEventType.Transaction ? this.onTransaction :
+            eventType === StreamEventType.Bundle ? this.onBundle :
             () => { throw new UnimplementedStreamEvent(eventType) }
 
         events.onmessage = (event) => {

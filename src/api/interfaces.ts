@@ -3,12 +3,12 @@ import { LogParams } from 'ethers'
 /**
  * Used to specify which type of event to listen for.
  */
-export enum StreamEvent {
+export enum StreamEventType {
     Bundle = 'bundle',
     Transaction = 'transaction',
 }
 
-export type StreamEventName = `${StreamEvent}`
+export type StreamEventName = `${StreamEventType}`
 
 /** Data about the event history endpoint. */
 export type EventHistoryInfo = {
