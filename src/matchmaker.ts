@@ -50,8 +50,9 @@ export default class Matchmaker {
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
-    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): Matchmaker {
-        const network = SupportedNetworks.getNetwork(chainId)
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): Matchmaker {
+        const chainNum = typeof chainId == "bigint" ? Number(chainId) : chainId
+        const network = SupportedNetworks.getNetwork(chainNum)
         return new Matchmaker(authSigner, network)
     }
 
