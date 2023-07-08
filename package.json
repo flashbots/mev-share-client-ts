@@ -1,6 +1,6 @@
 {
   "name": "@flashbots/matchmaker-ts",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Matchmaker client library for Flashbots mev-share.",
   "main": "build/index.js",
   "repository": "https://github.com/flashbots/matchmaker-ts",
