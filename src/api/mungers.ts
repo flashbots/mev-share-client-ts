@@ -2,7 +2,7 @@ import { LogParams } from 'ethers'
 import { BundleParams, HintPreferences, IEventHistoryEntry, SimBundleOptions, TransactionOptions } from './interfaces'
 
 /**
- * Convert name format of user-specified hints for Matchmaker API requests.
+ * Convert name format of user-specified hints for MEV-Share API requests.
  * @param hints - Hints specified by the user.
  */
 const mungeHintPreferences = (hints: HintPreferences) => {
@@ -12,7 +12,7 @@ const mungeHintPreferences = (hints: HintPreferences) => {
         calldata: hints.calldata,
         logs: hints.logs,
         tx_hash: hints.txHash,
-        hash: true, // tx hash is always shared on Flashbots Matchmaker; abstract away from user
+        hash: true, // tx hash is always shared on Flashbots MEV-Share; abstract away from user
         // setting all hints except hash to false will enable full privacy
     }
 }
@@ -28,7 +28,7 @@ const extractSpecifiedHints = (hints: HintPreferences): string[] => {
 }
 
 /**
- * Converts user-specified parameters into parameters for a sendPrivateTransaction call to the Matchmaker API.
+ * Converts user-specified parameters into parameters for a sendPrivateTransaction call to the MEV-Share API.
  * @param signedTx - Signed transaction to send.
  * @param options - Privacy/execution settings for the transaction.
  * @returns Single-element array containing params object for sendPrivateTransaction call.
@@ -49,7 +49,7 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
 }
 
 /**
- * Converts user-specified parameters into parameters for a mev_sendBundle call to the Matchmaker API.
+ * Converts user-specified parameters into parameters for a mev_sendBundle call to the MEV-Share API.
  * @param params - Privacy/execution parameters for the bundle
  * @returns Single-element array containing params object for sendPrivateTransaction call.
  */

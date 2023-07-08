@@ -1,14 +1,14 @@
 import { AxiosError } from 'axios'
 import { StreamEvent } from './api/interfaces'
 
-class MatchmakerError extends Error {
+class MevShareError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = "MatchmakerError";
+        this.name = "MevShareError";
     }
 }
 
-export class JsonRpcError extends MatchmakerError {
+export class JsonRpcError extends MevShareError {
     constructor(error: {code: number, message: string}) {
         super(`${error.code}: ${error.message}`)
         this.name = `JsonRpcError: ${error.code}`
@@ -16,7 +16,7 @@ export class JsonRpcError extends MatchmakerError {
     }
 }
 
-export class NetworkFailure extends MatchmakerError {
+export class NetworkFailure extends MevShareError {
     constructor(e: AxiosError) {
         const err = e as AxiosError
         super(`${err.response?.status}: ${JSON.stringify(err.response?.data)}\n${err.stack}`)
@@ -24,18 +24,18 @@ export class NetworkFailure extends MatchmakerError {
     }
 }
 
-export class UnimplementedNetwork extends MatchmakerError {
+export class UnimplementedNetwork extends MevShareError {
     constructor({chainId}: {chainId: number}) {
         super(`Cannot infer network params from chainId: ${chainId}`)
         this.name = "UnimplementedNetwork"
     }
 }
 
-export class UnimplementedStreamEvent extends MatchmakerError {
+export class UnimplementedStreamEvent extends MevShareError {
     constructor(eventType: StreamEvent) {
         super(`Unimplemented stream event type: ${eventType.toString()}`)
         this.name = "UnimplementedStreamEvent"
     }
 }
 
-export default MatchmakerError
+export default MevShareError

@@ -1,6 +1,6 @@
-# Flashbots Matchmaker
+# Flashbots MEV-Share Client
 
-Client library for Flashbots `MEV-share` Matchmaker.
+Client library for MEV-Share written in Typescript.
 
 Based on [prospective API docs](https://flashbots.notion.site/PUBLIC-Prospective-MEV-Share-API-docs-28610c583e5b485d92b62daf6e0cc874).
 
@@ -9,25 +9,25 @@ Based on [prospective API docs](https://flashbots.notion.site/PUBLIC-Prospective
 Install from npm:
 
 ```sh
-yarn add @flashbots/matchmaker-ts
+yarn add @flashbots/mev-share-client
 # or
-npm i @flashbots/matchmaker-ts
+npm i @flashbots/mev-share-client
 ```
 
 Alternatively, clone the library & build from source:
 
 ```sh
-git clone https://github.com/flashbots/matchmaker-ts
-cd matchmaker-ts
+git clone https://github.com/flashbots/mev-share-client-ts
+cd mev-share-client-ts
 yarn install && yarn build
 ```
 
 ```sh
-# in your project, assuming it has the same parent directory as matchmaker-ts
-yarn add ../matchmaker-ts
+# in your project, assuming it has the same parent directory as mev-share-client-ts
+yarn add ../mev-share-client-ts
 ```
 
-### use matchmaker in your project
+### use mev-share-client in your project
 
 > :warning: Variables denoted in `ALL_CAPS` are placeholders; the code does not compile. [examples/](#examples) contains compilable demos.
 
@@ -35,56 +35,56 @@ In your project:
 
 ```typescript
 import { Wallet, JsonRpcProvider } from "ethers"
-import Matchmaker, {
+import MevShare, {
     BundleParams,
     HintPreferences,
     IPendingBundle,
     IPendingTransaction,
     TransactionOptions
-} from "@flashbots/matchmaker-ts"
+} from "@flashbots/mev-share-client"
 
 const provider = new JsonRpcProvider(RPC_URL)
 const authSigner = new Wallet(FB_REPUTATION_PRIVATE_KEY, provider)
 ```
 
-The `Matchmaker` class has built-in initializers for networks supported by Flashbots.
+The `MevShare` class has built-in initializers for networks supported by Flashbots.
 
 #### Connect to Ethereum Mainnet
 
 ```typescript
-const matchmaker = Matchmaker.useEthereumMainnet(authSigner)
+const mevshare = MevShare.useEthereumMainnet(authSigner)
 ```
 
 #### Connect to Ethereum Goerli
 
 ```typescript
-const matchmaker = Matchmaker.useEthereumGoerli(authSigner)
+const mevshare = MevShare.useEthereumGoerli(authSigner)
 ```
 
 #### Connect with an Ethers Provider or Chain ID
 
-Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a Matchmaker using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
+Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a MevShare using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
 
 ```typescript
 import { JsonRpcProvider, Wallet } from "ethers" // ethers v6
 
-/** connects to Flashbots matchmaker on goerli */
+/** connects to Flashbots MEV-Share node on goerli */
 const provider = new JsonRpcProvider("http://localhost:8545", {chainId: 5, name: "goerli"})
 const authSigner = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
     .connect(provider)
 
-const matchmaker = Matchmaker.fromNetwork(authSigner, provider._network)
+const mevshare = MevShare.fromNetwork(authSigner, provider._network)
 
 // manually with a chainId:
-const matchmaker = Matchmaker.fromNetwork(authSigner, {chainId: 5})
+const mevshare = MevShare.fromNetwork(authSigner, {chainId: 5})
 ```
 
 #### Connect to a custom network
 
-To use custom network parameters, you can instantiate a new Matchmaker directly. This example is what the client uses to connect to mainnet:
+To use custom network parameters, you can instantiate a new `MevShare` instance directly. This example is what the client uses to connect to mainnet:
 
 ```typescript
-const matchmaker = new Matchmaker(authSigner, {
+const mevshare = new MevShare(authSigner, {
     name: "mainnet",
     chainId: 1,
     streamUrl: "https://mev-share.flashbots.net",
@@ -92,7 +92,7 @@ const matchmaker = new Matchmaker(authSigner, {
 })
 ```
 
-See [MatchmakerNetwork](/src/api/interfaces.ts#L15) for more details.
+See `MevShareNetwork` in [src/api/interfaces](/src/api/interfaces.ts) for more details.
 
 ### examples
 
@@ -108,7 +108,7 @@ vim .env
 
 #### send a tx with hints
 
-This example sends a transaction to the Flashbots Goerli Matchmaker from the account specified by SENDER_PRIVATE_KEY with a hex-encoded string as calldata.
+This example sends a transaction to the Flashbots MEV-Share node on Goerli from the account specified by SENDER_PRIVATE_KEY with a hex-encoded string as calldata.
 
 ```sh
 yarn example.tx
@@ -139,7 +139,7 @@ See [src/api/interfaces.ts](src/api/interfaces.ts) for interface definitions.
 Use `on` to start listening for events on mev-share. The function registers the provided callback to be called when a new event is detected.
 
 ```typescript
-const handler = matchmaker.on("transaction", (tx: IPendingTransaction) => {
+const handler = mevshare.on("transaction", (tx: IPendingTransaction) => {
     // handle pending tx
 })
 
@@ -149,7 +149,7 @@ handler.close()
 
 ### `sendTransaction`
 
-Sends a private transaction to the Flashbots Matchmaker with specified hint parameters.
+Sends a private transaction to the Flashbots MEV-Share node with specified hint parameters.
 
 ```typescript
 const wallet = new Wallet(PRIVATE_KEY)
@@ -177,7 +177,7 @@ const shareTxParams: TransactionOptions = {
 }
 
 const signedTx = await wallet.signTransaction(tx)
-await matchmaker.sendTransaction(SIGNED_TX, shareTxParams)
+await mevshare.sendTransaction(SIGNED_TX, shareTxParams)
 ```
 
 ### `sendBundle`
@@ -197,7 +197,7 @@ const bundleParams: BundleParams = {
         {tx: SIGNED_TX, canRevert: false},
     ],
 }
-await matchmaker.sendBundle(bundleParams)
+await mevshare.sendBundle(bundleParams)
 ```
 
 Bundles that _only_ contain signed transactions can share hints about the transactions in their bundle by setting the `privacy` parameter:
@@ -223,7 +223,7 @@ const bundleParams: BundleParams = {
         },
     }
 }
-const backrunResult = await matchmaker.sendBundle(bundleParams)
+const backrunResult = await mevshare.sendBundle(bundleParams)
 ```
 
 ### `simulateBundle`
@@ -259,7 +259,7 @@ const simBundleOptions: SimBundleOptions = {
     // timeout: number,
 }
 
-const simResult = await matchmaker.simulateBundle(bundle, simBundleOptions)
+const simResult = await mevshare.simulateBundle(bundle, simBundleOptions)
 ```
 
 This example uses the state of `parentBlock`, but overrides the state's `blockNumber` value. Setting more fields in `SimBundleOptions` is useful when testing smart contracts which have specific criteria that must be met, like the block being a certain number, or a specific timestamp having passed.
@@ -271,7 +271,7 @@ Get information about the event history endpoint for use in [`getEventHistory`](
 Example:
 
 ```typescript
-const info = await matchmaker.getEventHistoryInfo()
+const info = await mevshare.getEventHistoryInfo()
 console.log(info)
 ```
 
@@ -295,11 +295,11 @@ Get historical event stream data.
 Using the data from our [`getEventHistoryInfo`](#geteventhistoryinfo) call, we can read events starting from the beginning. The data is paginated, so to read all of it, you'll have to make multiple calls to iterate through the it.
 
 ```typescript
-const info = await matchmaker.getEventHistoryInfo()
+const info = await mevshare.getEventHistoryInfo()
 
 // read every event
 for (let i = 0; i < Math.ceil(info.count / info.maxLimit); i++) {
-    const events = await matchmaker.getEventHistory({
+    const events = await mevshare.getEventHistory({
         limit: info.maxLimit,
         offset: i * info.maxLimit,
         blockStart: info.minBlock,
@@ -311,7 +311,7 @@ for (let i = 0; i < Math.ceil(info.count / info.maxLimit); i++) {
 You can also filter events by timestamp:
 
 ```typescript
-const events = await matchmaker.getEventHistory({
+const events = await mevshare.getEventHistory({
     limit: info.maxLimit,
     offset: i * info.maxLimit,
     timestampStart: 1686942023,

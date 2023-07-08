@@ -6,10 +6,10 @@ import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import {
     BundleParams,
-    MatchmakerNetwork,
+    MevShareNetwork,
     TransactionOptions,
     StreamEvent,
-    IMatchmakerEvent,
+    IMevShareEvent,
     IPendingTransaction,
     IPendingBundle,
     SimBundleOptions,
@@ -30,29 +30,29 @@ import { URLSearchParams } from 'url';
 // when calling mev_simBundle on a {tx} specified bundle, how long to wait for target to appear onchain
 const TIMEOUT_QUERY_TX_MS = 5 * 60 * 1000
 
-export default class Matchmaker {
+export default class MevShareClient {
     constructor(
         private authSigner: Wallet,
-        private network: MatchmakerNetwork,
+        private network: MevShareNetwork,
     ) {
         this.authSigner = authSigner
         this.network = network
     }
 
-    /** Connect to Flashbots Mainnet Matchmaker. */
-    static useEthereumMainnet(authSigner: Wallet): Matchmaker {
-        return new Matchmaker(authSigner, SupportedNetworks.mainnet)
+    /** Connect to Flashbots MEV-Share node on Mainnet. */
+    static useEthereumMainnet(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.mainnet)
     }
 
-    /** Connect to Flashbots Goerli Matchmaker. */
-    static useEthereumGoerli(authSigner: Wallet): Matchmaker {
-        return new Matchmaker(authSigner, SupportedNetworks.goerli)
+    /** Connect to Flashbots MEV-Share node on Goerli. */
+    static useEthereumGoerli(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.goerli)
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
-    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): Matchmaker {
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): MevShareClient {
         const network = SupportedNetworks.getNetwork(chainId)
-        return new Matchmaker(authSigner, network)
+        return new MevShareClient(authSigner, network)
     }
 
     /** Make an HTTP POST request to a JSON-RPC endpoint.
@@ -105,7 +105,7 @@ export default class Matchmaker {
      * @param callback - Async function to process pending tx.
      */
     private onTransaction(
-        event: IMatchmakerEvent,
+        event: IMevShareEvent,
         callback: (data: IPendingTransaction) => void
     ) {
         if (!event.txs || (event.txs && event.txs.length === 1)) {
@@ -119,7 +119,7 @@ export default class Matchmaker {
      * @param callback - Async function to process pending tx.
      */
     private onBundle(
-        event: IMatchmakerEvent,
+        event: IMevShareEvent,
         callback: (data: IPendingBundle) => void
     ) {
         if (event.txs && event.txs.length > 1) {
