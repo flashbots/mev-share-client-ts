@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Network, Wallet } from 'ethers'
-import Matchmaker from '../..'
+import MevShareClient from '../..'
 import Env from './env'
 
 export function getProvider() {
@@ -13,7 +13,7 @@ export async function initExample(provider: JsonRpcProvider) {
         provider,
         wallet: new Wallet(Env.senderKey).connect(provider),
         authSigner,
-        matchmaker: Matchmaker.useEthereumGoerli(authSigner),
+        mevshare: MevShareClient.useEthereumGoerli(authSigner),
         feeData: await provider.getFeeData(),
     }
 }

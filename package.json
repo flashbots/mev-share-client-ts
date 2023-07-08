@@ -1,9 +1,9 @@
 {
-  "name": "@flashbots/matchmaker-ts",
+  "name": "@flashbots/mev-share-client",
   "version": "0.7.5",
-  "description": "Matchmaker client library for Flashbots mev-share.",
+  "description": "MEV-Share client library for Flashbots mev-share.",
   "main": "build/index.js",
-  "repository": "https://github.com/flashbots/matchmaker-ts",
+  "repository": "https://github.com/flashbots/mev-share-client-ts",
   "author": "zeroXbrock",
   "license": "MIT",
   "dependencies": {

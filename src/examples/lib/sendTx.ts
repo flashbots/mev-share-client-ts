@@ -3,7 +3,7 @@ import { HintPreferences } from '../..'
 import { initExample } from './helpers'
 
 export const setupTxExample = async (provider: JsonRpcProvider, tip?: BigInt, flair?: string) => {
-    const { wallet, feeData, matchmaker } = await initExample(provider)
+    const { wallet, feeData, mevshare } = await initExample(provider)
     const tipActual = tip ? tip.valueOf() : BigInt(0)
     const tx: TransactionRequest = {
         type: 2,
@@ -20,7 +20,7 @@ export const setupTxExample = async (provider: JsonRpcProvider, tip?: BigInt, fl
     return {
         wallet,
         provider,
-        matchmaker,
+        mevshare,
         tx,
         signedTx: await wallet.signTransaction(tx),
     }
@@ -32,8 +32,8 @@ export const sendTx = async (
     maxBlockNumber?: number,
     tip?: BigInt,
 ) => {
-    const {matchmaker, signedTx} = await setupTxExample(provider, tip)
-    return await matchmaker.sendTransaction(signedTx,
+    const {mevshare, signedTx} = await setupTxExample(provider, tip)
+    return await mevshare.sendTransaction(signedTx,
         {hints, maxBlockNumber}
     )
 }

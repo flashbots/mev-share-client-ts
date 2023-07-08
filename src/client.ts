@@ -82,7 +82,7 @@ export default class MevShareClient {
     }
 
     /**
-     * Sends a POST request to the Matchmaker API and returns the data.
+     * Sends a POST request to the MEV-Share API and returns the data.
      * @param params - JSON-RPC params.
      * @param method - JSON-RPC method.
      * @returns Response data from the API request.
@@ -129,7 +129,7 @@ export default class MevShareClient {
 
 
     /**
-     * Starts listening to the Matchmaker event stream and registers the given callback to be invoked when the given event type is received.
+     * Starts listening to the MEV-Share event stream and registers the given callback to be invoked when the given event type is received.
      * @param eventType - The type of event to listen for. Options specified by StreamEvent enum.
      * @param callback - The function to call when a new event is received.
      * @returns Stream handler. Call `.close()` on it before terminating your program.
@@ -160,7 +160,7 @@ export default class MevShareClient {
         return events
     }
 
-    /** Sends a private transaction with MEV hints to the Flashbots Matchmaker.
+    /** Sends a private transaction with MEV hints to the Flashbots MEV-Share node.
      * @param signedTx - Signed transaction to send.
      * @param options - Tx preferences; hints & block range.
      * @returns Transaction hash.

@@ -35,7 +35,7 @@ In your project:
 
 ```typescript
 import { Wallet, JsonRpcProvider } from "ethers"
-import MevShare, {
+import MevShareClient, {
     BundleParams,
     HintPreferences,
     IPendingBundle,
@@ -47,23 +47,23 @@ const provider = new JsonRpcProvider(RPC_URL)
 const authSigner = new Wallet(FB_REPUTATION_PRIVATE_KEY, provider)
 ```
 
-The `MevShare` class has built-in initializers for networks supported by Flashbots.
+The `MevShareClient` class has built-in initializers for networks supported by Flashbots.
 
 #### Connect to Ethereum Mainnet
 
 ```typescript
-const mevshare = MevShare.useEthereumMainnet(authSigner)
+const mevshare = MevShareClient.useEthereumMainnet(authSigner)
 ```
 
 #### Connect to Ethereum Goerli
 
 ```typescript
-const mevshare = MevShare.useEthereumGoerli(authSigner)
+const mevshare = MevShareClient.useEthereumGoerli(authSigner)
 ```
 
 #### Connect with an Ethers Provider or Chain ID
 
-Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a MevShare using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
+Networks supported by Flashbots have presets built-in. If it's more convenient, you can instantiate a MevShareClient using a `chainId` (or a ethers.js `Network` object, which has a `chainId` param).
 
 ```typescript
 import { JsonRpcProvider, Wallet } from "ethers" // ethers v6
@@ -73,18 +73,18 @@ const provider = new JsonRpcProvider("http://localhost:8545", {chainId: 5, name:
 const authSigner = new Wallet("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
     .connect(provider)
 
-const mevshare = MevShare.fromNetwork(authSigner, provider._network)
+const mevshare = MevShareClient.fromNetwork(authSigner, provider._network)
 
 // manually with a chainId:
-const mevshare = MevShare.fromNetwork(authSigner, {chainId: 5})
+const mevshare = MevShareClient.fromNetwork(authSigner, {chainId: 5})
 ```
 
 #### Connect to a custom network
 
-To use custom network parameters, you can instantiate a new `MevShare` instance directly. This example is what the client uses to connect to mainnet:
+To use custom network parameters, you can instantiate a new `MevShareClient` instance directly. This example is what the client uses to connect to mainnet:
 
 ```typescript
-const mevshare = new MevShare(authSigner, {
+const mevshare = new MevShareClient(authSigner, {
     name: "mainnet",
     chainId: 1,
     streamUrl: "https://mev-share.flashbots.net",
