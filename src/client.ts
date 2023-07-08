@@ -8,8 +8,8 @@ import {
     BundleParams,
     MevShareNetwork,
     TransactionOptions,
-    StreamEvent,
     IMevShareEvent,
+    StreamEventType,
     IPendingTransaction,
     IPendingBundle,
     SimBundleOptions,
@@ -20,9 +20,10 @@ import {
     StreamEventName,
     EventHistoryInfo,
     EventHistoryParams,
-    IEventHistoryEntry
+    IEventHistoryEntry,
+    EventHistoryEntry
 } from './api/interfaces'
-import { EventHistoryEntry, mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
+import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
 import { URLSearchParams } from 'url';
@@ -50,8 +51,9 @@ export default class MevShareClient {
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
-    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): MevShareClient {
-        const network = SupportedNetworks.getNetwork(chainId)
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): MevShareClient {
+        const chainNum = typeof chainId == "bigint" ? Number(chainId) : chainId
+        const network = SupportedNetworks.getNetwork(chainNum)
         return new MevShareClient(authSigner, network)
     }
 
@@ -135,14 +137,14 @@ export default class MevShareClient {
      * @returns Stream handler. Call `.close()` on it before terminating your program.
      */
     public on(
-        eventType: StreamEvent | StreamEventName,
+        eventType: StreamEventType | StreamEventName,
         callback: (data: IPendingBundle | IPendingTransaction) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)
 
         const eventHandler =
-            eventType === StreamEvent.Transaction ? this.onTransaction :
-            eventType === StreamEvent.Bundle ? this.onBundle :
+            eventType === StreamEventType.Transaction ? this.onTransaction :
+            eventType === StreamEventType.Bundle ? this.onBundle :
             () => { throw new UnimplementedStreamEvent(eventType) }
 
         events.onmessage = (event) => {
@@ -256,7 +258,7 @@ export default class MevShareClient {
         return await this.simBundle(params, simOptions)
     }
 
-    /** Gets information about the event history endpoint, such as (// TODO) */
+    /** Gets information about query parameters for the event history endpoint. */
     public async getEventHistoryInfo(): Promise<EventHistoryInfo> {
         return await this.streamGet("history/info")
     }

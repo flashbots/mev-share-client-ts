@@ -3,12 +3,12 @@ import { LogParams } from 'ethers'
 /**
  * Used to specify which type of event to listen for.
  */
-export enum StreamEvent {
+export enum StreamEventType {
     Bundle = 'bundle',
     Transaction = 'transaction',
 }
 
-export type StreamEventName = `${StreamEvent}`
+export type StreamEventName = `${StreamEventType}`
 
 /** Data about the event history endpoint. */
 export type EventHistoryInfo = {
@@ -53,11 +53,7 @@ export type IEventHistoryEntry = {
  * Use [supportedNetworks](./networks.ts) for presets.
  */
 export type MevShareNetwork = {
-    /** Chain ID of the network. e.g. `1` */
-    chainId: number,
-    /** Lowercase name of network. e.g. "mainnet" */
-    name: string,
-    /** MEV-Share event stream URL. */
+    /** Matchmaker event stream URL. */
     streamUrl: string,
     /** MEV-Share bundle & transaction API URL. */
     apiUrl: string,
@@ -240,16 +236,20 @@ export interface IMevShareEvent {
         callData?: string,
     }>,
     /**
-     * Change in coinbase value after inserting tx/bundle, divided by gas used.
+     * Hex string; change in coinbase value after inserting tx/bundle, divided by gas used.
      *
      * Can be used to determine the minimum payment to the builder to make your backrun look more profitable to builders.
-     * _Note: this only applies to builders like Flashbots who order bundles by MEV gas price._
-     */
-    mevGasPrice?: string,   // hex string
-    /** Gas used by the tx/bundle, rounded up to 2 most significant digits.
      *
-     * _Note: EXPERIMENTAL; only implemented on Goerli_ */
-    gasUsed?: string,       // hex string
+     * _Note: this only applies to builders like Flashbots who order bundles by MEV gas price._
+     *
+     * _Note: EXPERIMENTAL; only implemented on Goerli._
+     */
+    mevGasPrice?: string,
+    /** Hex string; gas used by the tx/bundle, rounded up to 2 most significant digits.
+     *
+     * _Note: EXPERIMENTAL; only implemented on Goerli._
+     */
+    gasUsed?: string,
 }
 
 /**
@@ -279,4 +279,30 @@ export interface IPendingBundle extends Omit<Omit<IMevShareEvent, 'mevGasPrice'>
      * {@link IMevShareEvent.gasUsed}
      */
     gasUsed?: bigint,
+}
+
+/** A past event from the MEV-Share event stream. */
+export class EventHistoryEntry {
+    public block: number
+    public timestamp: number
+    public hint: {
+        txs?: Array<{
+            to: string,
+            callData: string,
+            functionSelector: string,
+        }>,
+        hash: string,
+        logs?: Array<LogParams>,
+        gasUsed: bigint,
+        mevGasPrice: bigint,
+    }
+    constructor(entry: IEventHistoryEntry) {
+        this.block = entry.block
+        this.timestamp = entry.timestamp
+        this.hint = {
+            ...entry.hint,
+            gasUsed: entry.hint.gasUsed ? BigInt(entry.hint.gasUsed) : BigInt(0),
+            mevGasPrice: entry.hint.mevGasPrice ? BigInt(entry.hint.mevGasPrice) : BigInt(0),
+        }
+    }
 }
