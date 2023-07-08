@@ -1,4 +1,4 @@
-import MevShareClient from './matchmaker'
+import MevShareClient from './client'
 
 export {
     BundleParams,
