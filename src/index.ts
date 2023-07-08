@@ -6,7 +6,6 @@ export {
     IPendingBundle,
     IPendingTransaction,
     TransactionOptions,
-    // StreamEventType,
     EventHistoryInfo,
     EventHistoryParams,
     EventHistoryEntry,
