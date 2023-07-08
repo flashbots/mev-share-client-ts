@@ -6,7 +6,9 @@ export {
     IPendingBundle,
     IPendingTransaction,
     TransactionOptions,
-    StreamEvent,
+    EventHistoryInfo,
+    EventHistoryParams,
+    EventHistoryEntry,
 } from "./api/interfaces"
 
 export {SupportedNetworks} from "./api/networks"

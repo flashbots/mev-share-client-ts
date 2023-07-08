@@ -8,7 +8,7 @@ import {
     BundleParams,
     MatchmakerNetwork,
     TransactionOptions,
-    StreamEvent,
+    StreamEventType,
     IMatchmakerEvent,
     IPendingTransaction,
     IPendingBundle,
@@ -20,9 +20,10 @@ import {
     StreamEventName,
     EventHistoryInfo,
     EventHistoryParams,
-    IEventHistoryEntry
+    IEventHistoryEntry,
+    EventHistoryEntry
 } from './api/interfaces'
-import { EventHistoryEntry, mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
+import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
 import { SupportedNetworks } from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
 import { URLSearchParams } from 'url';
@@ -50,8 +51,9 @@ export default class Matchmaker {
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
-    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number}): Matchmaker {
-        const network = SupportedNetworks.getNetwork(chainId)
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): Matchmaker {
+        const chainNum = typeof chainId == "bigint" ? Number(chainId) : chainId
+        const network = SupportedNetworks.getNetwork(chainNum)
         return new Matchmaker(authSigner, network)
     }
 
@@ -135,14 +137,14 @@ export default class Matchmaker {
      * @returns Stream handler. Call `.close()` on it before terminating your program.
      */
     public on(
-        eventType: StreamEvent | StreamEventName,
+        eventType: StreamEventType | StreamEventName,
         callback: (data: IPendingBundle | IPendingTransaction) => void
     ): EventSource {
         const events = new EventSource(this.network.streamUrl)
 
         const eventHandler =
-            eventType === StreamEvent.Transaction ? this.onTransaction :
-            eventType === StreamEvent.Bundle ? this.onBundle :
+            eventType === StreamEventType.Transaction ? this.onTransaction :
+            eventType === StreamEventType.Bundle ? this.onBundle :
             () => { throw new UnimplementedStreamEvent(eventType) }
 
         events.onmessage = (event) => {
