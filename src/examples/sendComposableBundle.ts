@@ -1,14 +1,14 @@
 import { JsonRpcProvider, TransactionRequest, Wallet, hexlify, toBigInt, toUtf8Bytes } from 'ethers'
 
 // lib
-import Matchmaker, { BundleParams } from '..'
+import MevShareClient, { BundleParams } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import env from './lib/env'
 
 const NUM_TARGET_BLOCKS = 3
 
 /** Send a bundle that shares as much data as possible by setting the `privacy` param. */
-const sendTestBundle = async (provider: JsonRpcProvider, matchmaker: Matchmaker, wallet: Wallet, targetBlock: number) => {
+const sendTestBundle = async (provider: JsonRpcProvider, mevshare: MevShareClient, wallet: Wallet, targetBlock: number) => {
     const feeData = await provider.getFeeData()
     const tip = BigInt(1e9) * BigInt(2e7) // 0.02 eth
     const tx: TransactionRequest = {
@@ -47,21 +47,20 @@ const sendTestBundle = async (provider: JsonRpcProvider, matchmaker: Matchmaker,
             builders: ["flashbots"]
         }
     }
-    const backrunResult = await matchmaker.sendBundle(bundleParams)
+    const backrunResult = await mevshare.sendBundle(bundleParams)
     return {
         bundleParams,
         backrunResult,
     }
 }
 
-
 const main = async () => {
     const provider = getProvider()
-    const {matchmaker} = await initExample(provider)
+    const {mevshare} = await initExample(provider)
 
     const targetBlock = (await provider.getBlockNumber()) + 1
     const wallet = new Wallet(env.senderKey, provider)
-    const {bundleParams, backrunResult} = await sendTestBundle(provider, matchmaker, wallet, targetBlock)
+    const {bundleParams, backrunResult} = await sendTestBundle(provider, mevshare, wallet, targetBlock)
     console.log("bundleParams", bundleParams)
     console.log("backrunResult", backrunResult)
 }

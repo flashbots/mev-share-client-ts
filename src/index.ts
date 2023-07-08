@@ -1,4 +1,4 @@
-import Matchmaker from './matchmaker'
+import MevShareClient from './client'
 
 export {
     BundleParams,
@@ -13,4 +13,4 @@ export {
 
 export {SupportedNetworks} from "./api/networks"
 
-export default Matchmaker
+export default MevShareClient

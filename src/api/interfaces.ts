@@ -48,14 +48,14 @@ export type IEventHistoryEntry = {
 }
 
 /**
- * Configuration used to connect to the Matchmaker.
+ * Configuration used to connect to the MEV-Share node.
  *
  * Use [supportedNetworks](./networks.ts) for presets.
  */
-export type MatchmakerNetwork = {
+export type MevShareNetwork = {
     /** Matchmaker event stream URL. */
     streamUrl: string,
-    /** Matchmaker bundle & transaction API URL. */
+    /** MEV-Share bundle & transaction API URL. */
     apiUrl: string,
 }
 
@@ -99,7 +99,7 @@ export interface BundleParams {
         /** Maximum block height in which the bundle can be included. */
         maxBlock?: number,
     },
-    /** Transactions that make up the bundle. `hash` refers to a transaction hash from the Matchmaker event stream. */
+    /** Transactions that make up the bundle. `hash` refers to a transaction hash from the MEV-Share event stream. */
     body: Array<
         { hash: string } |
         { tx: string, canRevert: boolean } |
@@ -134,7 +134,7 @@ export interface BundleParams {
     }
 }
 
-/** Response received from matchmaker API */
+/** Response received from MEV-Share API */
 interface ISendBundleResponse {
     /** Bundle hash. */
     bundleHash: string,
@@ -183,7 +183,7 @@ export interface SimBundleLogs {
     bundleLogs?: SimBundleLogs[],
 }
 
-/** Response received from matchmaker api. */
+/** Response received from MEV-Share api. */
 interface ISimBundleResponse {
     success: boolean,
     error?: string,
@@ -220,9 +220,9 @@ export const SimBundleResult = (response: ISimBundleResponse): ISimBundleResult 
 })
 
 /**
- * General API wrapper for events received by the SSE stream (via `matchmaker.on(...)`).
+ * General API wrapper for events received by the SSE stream (via `mevshare.on(...)`).
 */
-export interface IMatchmakerEvent {
+export interface IMevShareEvent {
     /** Transaction or Bundle hash. */
     hash: string,
     /** Logs emitted by the transaction or bundle. */
@@ -253,30 +253,30 @@ export interface IMatchmakerEvent {
 }
 
 /**
- * Pending transaction from the matchmaker stream.
+ * Pending transaction from the MEV-Share event stream.
  */
-export interface IPendingTransaction extends Omit<Omit<Omit<IMatchmakerEvent, 'txs'>, 'mevGasPrice'>, 'gasUsed'> {
+export interface IPendingTransaction extends Omit<Omit<Omit<IMevShareEvent, 'txs'>, 'mevGasPrice'>, 'gasUsed'> {
     to?: string,
     functionSelector?: string,
     callData?: string,
     /**
-     * {@link IMatchmakerEvent.mevGasPrice}
+     * {@link IMevShareEvent.mevGasPrice}
      */
     mevGasPrice?: bigint,
     /**
-     * {@link IMatchmakerEvent.gasUsed}
+     * {@link IMevShareEvent.gasUsed}
      */
     gasUsed?: bigint,
 }
 
-/** Pending bundle from the matchmaker stream. */
-export interface IPendingBundle extends Omit<Omit<IMatchmakerEvent, 'mevGasPrice'>, 'gasUsed'> {
+/** Pending bundle from the MEV-Share event stream. */
+export interface IPendingBundle extends Omit<Omit<IMevShareEvent, 'mevGasPrice'>, 'gasUsed'> {
     /**
-     * {@link IMatchmakerEvent.mevGasPrice}
+     * {@link IMevShareEvent.mevGasPrice}
      */
     mevGasPrice?: bigint,
     /**
-     * {@link IMatchmakerEvent.gasUsed}
+     * {@link IMevShareEvent.gasUsed}
      */
     gasUsed?: bigint,
 }

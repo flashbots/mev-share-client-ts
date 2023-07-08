@@ -1,5 +1,5 @@
 import { LogParams } from 'ethers';
-import { IMatchmakerEvent, IPendingBundle, IPendingTransaction } from './interfaces';
+import { IMevShareEvent, IPendingBundle, IPendingTransaction } from './interfaces';
 
 export class PendingTransaction implements IPendingTransaction {
     hash: string
@@ -10,7 +10,7 @@ export class PendingTransaction implements IPendingTransaction {
     mevGasPrice?: bigint
     gasUsed?: bigint
 
-    constructor(event: IMatchmakerEvent) {
+    constructor(event: IMevShareEvent) {
         this.hash = event.hash
         this.logs = event.logs || undefined
         this.to = event.txs && event.txs[0].to
@@ -28,7 +28,7 @@ export class PendingBundle implements IPendingBundle {
     mevGasPrice?: bigint
     gasUsed?: bigint
 
-    constructor(event: IMatchmakerEvent) {
+    constructor(event: IMevShareEvent) {
         this.hash = event.hash
         this.logs = event.logs || undefined
         this.txs = event.txs

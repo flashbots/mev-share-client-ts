@@ -2,7 +2,7 @@ import { JsonRpcProvider, formatEther, keccak256 } from 'ethers'
 import { Mutex } from "async-mutex"
 
 // lib
-import Matchmaker, { BundleParams, IPendingTransaction } from '..'
+import MevShareClient, { BundleParams, IPendingTransaction } from '..'
 import { getProvider, initExample } from './lib/helpers'
 import { sendTx, setupTxExample } from './lib/sendTx'
 import { AsyncArray } from './lib/async'
@@ -12,7 +12,7 @@ const NUM_TARGET_BLOCKS = 3
 /**
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
-const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPendingTransaction, matchmaker: Matchmaker, targetBlock: number) => {
+const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPendingTransaction, mevshare: MevShareClient, targetBlock: number) => {
     // send bundle w/ (basefee + 100)gwei gas fee
     const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e3), "im backrunniiiiing")
     const backrunTx = {
@@ -31,7 +31,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPend
         },
         body: bundle,
     }
-    const backrunResult = await matchmaker.sendBundle(bundleParams)
+    const backrunResult = await mevshare.sendBundle(bundleParams)
     return {
         bundleParams,
         backrunResult,
@@ -42,7 +42,7 @@ const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPend
 const handleBackrun = async (
     pendingTx: IPendingTransaction,
     provider: JsonRpcProvider,
-    matchmaker: Matchmaker,
+    mevshare: MevShareClient,
     pendingMutex: Mutex,
     pendingTxHashes: AsyncArray<string>,
 ): Promise<void> => {
@@ -57,7 +57,7 @@ const handleBackrun = async (
     const {
         bundleParams,
         backrunResult,
-    } = await sendTestBackrunBundle(provider, pendingTx, matchmaker, targetBlock)
+    } = await sendTestBackrunBundle(provider, pendingTx, mevshare, targetBlock)
     console.log("backrun result", backrunResult)
 
     // watch future blocks for backrun tx inclusion
@@ -85,7 +85,7 @@ const handleBackrun = async (
                 const simOptions = {
                     parentBlock: receipt.blockNumber - 1,
                 }
-                const simResult = await matchmaker.simulateBundle(bundleParams, simOptions)
+                const simResult = await mevshare.simulateBundle(bundleParams, simOptions)
                 console.log(`simResult (simOptions=${JSON.stringify(simOptions, null, 2)})`, simResult)
                 console.log(`profit: ${formatEther(simResult.profit)} ETH`)
                 
@@ -108,7 +108,7 @@ const handleBackrun = async (
  */
 const main = async () => {
     const provider = getProvider()
-    const {matchmaker} = await initExample(provider)
+    const {mevshare} = await initExample(provider)
 
     // used for tracking txs we sent. we only want to backrun txs we sent, 
     // since we're using one account and incrementing the nonce of the bundle's 2nd tx
@@ -118,8 +118,8 @@ const main = async () => {
     const pendingMutex = new Mutex()
     
     // listen for txs
-    const txHandler = matchmaker.on("transaction", async (pendingTx: IPendingTransaction) => {
-        await handleBackrun(pendingTx, provider, matchmaker, pendingMutex, pendingTxHashes)
+    const txHandler = mevshare.on("transaction", async (pendingTx: IPendingTransaction) => {
+        await handleBackrun(pendingTx, provider, mevshare, pendingMutex, pendingTxHashes)
     })
     console.log("listening for transactions...")
 

@@ -1,7 +1,7 @@
 import { UnimplementedNetwork } from '../error'
 
 /**
- * Network connection presets supported by the Flashbots Matchmaker.
+ * Network connection presets supported by Flashbots.
  */
 export class SupportedNetworks {
     private static supportedNetworks = {
@@ -30,6 +30,7 @@ export class SupportedNetworks {
         return Object.values(this.supportedNetworks).map(n => n.chainId).includes(chainId)
     }
 
+    /** Gets the network preset matching the provided chainId, throws an error if not found. */
     static getNetwork(chainId: number) {
         if (this.supportsChainId(chainId)) {
             const net = Object.values(this.supportedNetworks).find(net => net.chainId === chainId)

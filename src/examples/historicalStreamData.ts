@@ -2,14 +2,14 @@ import { getProvider, initExample } from './lib/helpers'
 
 const main = async () => {
     const provider = getProvider()
-    const { matchmaker } = await initExample(provider)
-    const info = await matchmaker.getEventHistoryInfo()
+    const { mevshare } = await initExample(provider)
+    const info = await mevshare.getEventHistoryInfo()
     console.log(info)
 
     let i = 0
     let done = false
     while (!done) {
-        const resHistory = await matchmaker.getEventHistory({
+        const resHistory = await mevshare.getEventHistory({
             limit: info.maxLimit,
             offset: i * info.maxLimit,
             blockStart: info.minBlock,

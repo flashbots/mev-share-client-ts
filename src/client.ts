@@ -6,10 +6,10 @@ import { JsonRpcError, NetworkFailure, UnimplementedStreamEvent } from './error'
 import { getRpcRequest, JsonRpcData } from './flashbots';
 import {
     BundleParams,
-    MatchmakerNetwork,
+    MevShareNetwork,
     TransactionOptions,
+    IMevShareEvent,
     StreamEventType,
-    IMatchmakerEvent,
     IPendingTransaction,
     IPendingBundle,
     SimBundleOptions,
@@ -31,30 +31,30 @@ import { URLSearchParams } from 'url';
 // when calling mev_simBundle on a {tx} specified bundle, how long to wait for target to appear onchain
 const TIMEOUT_QUERY_TX_MS = 5 * 60 * 1000
 
-export default class Matchmaker {
+export default class MevShareClient {
     constructor(
         private authSigner: Wallet,
-        private network: MatchmakerNetwork,
+        private network: MevShareNetwork,
     ) {
         this.authSigner = authSigner
         this.network = network
     }
 
-    /** Connect to Flashbots Mainnet Matchmaker. */
-    static useEthereumMainnet(authSigner: Wallet): Matchmaker {
-        return new Matchmaker(authSigner, SupportedNetworks.mainnet)
+    /** Connect to Flashbots MEV-Share node on Mainnet. */
+    static useEthereumMainnet(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.mainnet)
     }
 
-    /** Connect to Flashbots Goerli Matchmaker. */
-    static useEthereumGoerli(authSigner: Wallet): Matchmaker {
-        return new Matchmaker(authSigner, SupportedNetworks.goerli)
+    /** Connect to Flashbots MEV-Share node on Goerli. */
+    static useEthereumGoerli(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.goerli)
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
-    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): Matchmaker {
+    static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): MevShareClient {
         const chainNum = typeof chainId == "bigint" ? Number(chainId) : chainId
         const network = SupportedNetworks.getNetwork(chainNum)
-        return new Matchmaker(authSigner, network)
+        return new MevShareClient(authSigner, network)
     }
 
     /** Make an HTTP POST request to a JSON-RPC endpoint.
@@ -84,7 +84,7 @@ export default class Matchmaker {
     }
 
     /**
-     * Sends a POST request to the Matchmaker API and returns the data.
+     * Sends a POST request to the MEV-Share API and returns the data.
      * @param params - JSON-RPC params.
      * @param method - JSON-RPC method.
      * @returns Response data from the API request.
@@ -107,7 +107,7 @@ export default class Matchmaker {
      * @param callback - Async function to process pending tx.
      */
     private onTransaction(
-        event: IMatchmakerEvent,
+        event: IMevShareEvent,
         callback: (data: IPendingTransaction) => void
     ) {
         if (!event.txs || (event.txs && event.txs.length === 1)) {
@@ -121,7 +121,7 @@ export default class Matchmaker {
      * @param callback - Async function to process pending tx.
      */
     private onBundle(
-        event: IMatchmakerEvent,
+        event: IMevShareEvent,
         callback: (data: IPendingBundle) => void
     ) {
         if (event.txs && event.txs.length > 1) {
@@ -131,7 +131,7 @@ export default class Matchmaker {
 
 
     /**
-     * Starts listening to the Matchmaker event stream and registers the given callback to be invoked when the given event type is received.
+     * Starts listening to the MEV-Share event stream and registers the given callback to be invoked when the given event type is received.
      * @param eventType - The type of event to listen for. Options specified by StreamEvent enum.
      * @param callback - The function to call when a new event is received.
      * @returns Stream handler. Call `.close()` on it before terminating your program.
@@ -162,7 +162,7 @@ export default class Matchmaker {
         return events
     }
 
-    /** Sends a private transaction with MEV hints to the Flashbots Matchmaker.
+    /** Sends a private transaction with MEV hints to the Flashbots MEV-Share node.
      * @param signedTx - Signed transaction to send.
      * @param options - Tx preferences; hints & block range.
      * @returns Transaction hash.
@@ -258,7 +258,7 @@ export default class Matchmaker {
         return await this.simBundle(params, simOptions)
     }
 
-    /** Gets information about the event history endpoint, such as (// TODO) */
+    /** Gets information about query parameters for the event history endpoint. */
     public async getEventHistoryInfo(): Promise<EventHistoryInfo> {
         return await this.streamGet("history/info")
     }
