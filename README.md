@@ -2,7 +2,7 @@
 
 Client library for MEV-Share written in Typescript.
 
-Based on [prospective API docs](https://flashbots.notion.site/PUBLIC-Prospective-MEV-Share-API-docs-28610c583e5b485d92b62daf6e0cc874).
+Based on [MEV-Share Spec](https://github.com/flashbots/mev-share).
 
 ## quickstart
 
