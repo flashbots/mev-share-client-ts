@@ -38,11 +38,11 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
         maxBlockNumber: options?.maxBlockNumber && `0x${options.maxBlockNumber.toString(16)}`,
         preferences: {
             fast: true, // deprecated but required; setting has no effect
-            // privacy uses default (Stable) config if no hints specified
-            privacy: options?.hints && {
-                hints: extractSpecifiedHints(options.hints),
+            // privacy uses default (Stable) config if not specified
+            privacy: (options?.hints || options?.builders) && {
+                hints: options?.hints && extractSpecifiedHints(options.hints),
+                builders: options?.builders,
             },
-            builders: options?.builders,
         },
     }]
 }
