@@ -14,7 +14,7 @@ const NUM_TARGET_BLOCKS = 3
  */
 const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPendingTransaction, mevshare: MevShareClient, targetBlock: number) => {
     // send bundle w/ (basefee + 100)gwei gas fee
-    const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e3), "im backrunniiiiing")
+    const {tx, wallet} = await setupTxExample(provider, BigInt(1e8) * BigInt(1e3), "im backrunniiiiing")
     const backrunTx = {
         ...tx,
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
