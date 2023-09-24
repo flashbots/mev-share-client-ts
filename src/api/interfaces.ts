@@ -69,8 +69,10 @@ export interface HintPreferences {
     contractAddress?: boolean,
     /** Share the 4byte function selector of the transaction. */
     functionSelector?: boolean,
-    /** Share the logs emitted by the transaction. */
+    /** Share all logs emitted by the transaction. */
     logs?: boolean,
+    /** Share specific subset of swap-adjacent logs of the transaction. */
+    defaultLogs?: boolean,
     /** Share tx hashes of transactions in bundle. */
     txHash?: boolean,
 }
