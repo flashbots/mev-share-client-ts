@@ -1,6 +1,6 @@
 {
   "name": "@flashbots/mev-share-client",
-  "version": "0.7.7",
+  "version": "0.7.9",
   "description": "MEV-Share client library for Flashbots mev-share.",
   "main": "build/index.js",
   "repository": "https://github.com/flashbots/mev-share-client-ts",
