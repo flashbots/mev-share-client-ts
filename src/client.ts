@@ -32,12 +32,14 @@ import { URLSearchParams } from 'url';
 const TIMEOUT_QUERY_TX_MS = 5 * 60 * 1000
 
 export default class MevShareClient {
+    private requestId: number
     constructor(
         private authSigner: Wallet,
         private network: MevShareNetwork,
     ) {
         this.authSigner = authSigner
         this.network = network
+        this.requestId = 0
     }
 
     /** Connect to Flashbots MEV-Share node on Mainnet. */
@@ -91,7 +93,7 @@ export default class MevShareClient {
      */
     private async handleApiRequest(params: Array<any>, method: any): Promise<any> {
         try {
-            return this.postRpc(this.network.apiUrl, await getRpcRequest(params, method, this.authSigner))
+            return this.postRpc(this.network.apiUrl, await getRpcRequest(params, method, this.requestId++, this.authSigner))
         } catch (e) {
             if (e instanceof AxiosError) {
                 throw new NetworkFailure(e)
