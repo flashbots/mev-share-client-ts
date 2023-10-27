@@ -85,7 +85,7 @@ export interface TransactionOptions {
     hints?: HintPreferences,
     /** Maximum block number for the transaction to be included in. */
     maxBlockNumber?: number,
-    /** Builders that are allowed to receive this tx. See [flashbots docs](https://docs.flashbots.net/flashbots-auction/advanced/rpc-endpoint#privacy) for supported builders. */
+    /** Builders that are allowed to receive this tx. See [flashbots docs](https://github.com/flashbots/dowg/blob/main/builder-registrations.json) for supported builders. */
     builders?: string[],
     /** Specifies how refund should be paid if tx is used by another searcher. */
     refund?: Array<{
@@ -137,7 +137,7 @@ export interface BundleParams {
     privacy?: {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints?: HintPreferences,
-        /** Builders that are allowed to receive this bundle. See [flashbots docs](https://docs.flashbots.net/flashbots-auction/advanced/rpc-endpoint#privacy) for supported builders. */
+        /** Builders that are allowed to receive this bundle. See [flashbots docs](https://github.com/flashbots/dowg/blob/main/builder-registrations.json) for supported builders. */
         builders?: Array<string>,
     },
     metadata?: {
