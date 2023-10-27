@@ -44,6 +44,9 @@ export function mungePrivateTxParams(signedTx: string, options?: TransactionOpti
                 hints: extractSpecifiedHints(options.hints),
             },
             builders: options?.builders,
+            validity: options?.refund && {
+                refund: options.refund
+            }
         },
     }]
 }

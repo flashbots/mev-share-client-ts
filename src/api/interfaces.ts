@@ -44,7 +44,7 @@ export type IEventHistoryEntry = {
         logs?: Array<LogParams>,
         gasUsed: string,
         mevGasPrice: string,
-    }
+    },
 }
 
 /**
@@ -85,7 +85,16 @@ export interface TransactionOptions {
     hints?: HintPreferences,
     /** Maximum block number for the transaction to be included in. */
     maxBlockNumber?: number,
+    /** Builders that are allowed to receive this tx. See [flashbots docs](https://github.com/flashbots/dowg/blob/main/builder-registrations.json) for supported builders. */
     builders?: string[],
+    /** Specifies how refund should be paid if tx is used by another searcher. */
+    refund?: Array<{
+         /** The address that receives this portion of the refund. */
+         address: string,
+         /** Percentage of refund to be paid to `address`. Set this to `100` unless splitting refunds between multiple recipients. */
+         percent: number,
+    }>,
+    
 }
 
 /**
@@ -128,12 +137,12 @@ export interface BundleParams {
     privacy?: {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints?: HintPreferences,
-        /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
+        /** Builders that are allowed to receive this bundle. See [flashbots docs](https://github.com/flashbots/dowg/blob/main/builder-registrations.json) for supported builders. */
         builders?: Array<string>,
     },
     metadata?: {
         originId?: string,
-    }
+    },
 }
 
 /** Response received from MEV-Share API */
