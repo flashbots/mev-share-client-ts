@@ -128,7 +128,7 @@ export interface BundleParams {
     privacy?: {
         /** Data fields from bundle transactions to be shared with searchers on MEV-Share. */
         hints?: HintPreferences,
-        /** Builders that are allowed to receive this bundle. See [mev-share spec](https://github.com/flashbots/mev-share/blob/main/builders/registration.json) for supported builders. */
+        /** Builders that are allowed to receive this bundle. See [dowg](https://github.com/flashbots/dowg/blob/main/builder-registrations.json) for supported builders. */
         builders?: Array<string>,
     },
     metadata?: {
