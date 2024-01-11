@@ -13,8 +13,8 @@ const NUM_TARGET_BLOCKS = 3
  * Generate a transaction to backrun a pending mev-share transaction and send it to mev-share.
  */
 const sendTestBackrunBundle = async (provider: JsonRpcProvider, pendingTx: IPendingTransaction, mevshare: MevShareClient, targetBlock: number) => {
-    // send bundle w/ (basefee + 100)gwei gas fee
-    const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e3), "im backrunniiiiing")
+    // send bundle w/ 100 gwei gas fee
+    const {tx, wallet} = await setupTxExample(provider, BigInt(1e9) * BigInt(1e2), "im backrunniiiiing")
     const backrunTx = {
         ...tx,
         nonce: tx.nonce ? tx.nonce + 1 : undefined,
