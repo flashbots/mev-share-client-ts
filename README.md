@@ -184,7 +184,7 @@ await mevshare.sendTransaction(SIGNED_TX, shareTxParams)
 
 Sends a bundle; an array of transactions with parameters to specify conditions for inclusion and MEV kickbacks. Transactions are placed in the `body` parameter with wrappers to indicate whether they're a new signed transaction or a pending transaction from the event stream.
 
-See [MEV-Share Docs](https://github.com/flashbots/mev-share/blob/main/src/mev_sendBundle.md) for detailed descriptions of these parameters.
+See [MEV-Share Docs](https://github.com/flashbots/mev-share/blob/main/specs/bundles/v0.1.md) for detailed descriptions of these parameters.
 
 ```typescript
 const targetBlock = 1 + await provider.getBlockNumber()
