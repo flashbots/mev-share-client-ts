@@ -102,6 +102,7 @@
   },
   "exclude": [
     "node_modules",
-    "build/**/*"
+    "build/**/*",
+    "src/tests/**/*",
   ]
 }
