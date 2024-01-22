@@ -57,6 +57,8 @@ export type MevShareNetwork = {
     streamUrl: string,
     /** MEV-Share bundle & transaction API URL. */
     apiUrl: string,
+    /** Custom headers to add to api requests to the apiUrl */
+    apiHeaders?: { [key: string]: string }
 }
 
 /**
