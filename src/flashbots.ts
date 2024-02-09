@@ -14,11 +14,11 @@ export type JsonRpcData = {
  * @param authSigner - Wallet used to sign Flashbots auth header; for reputation
  * @returns Parameters of payload to send to Bundle API
  */
-export const getRpcRequest = async (params: any, method: string, authSigner: Wallet) => {
+export const getRpcRequest = async (params: any, method: string, id: number, authSigner: Wallet) => {
     const body = {
         params,
         method,
-        id: 69,
+        id,
         jsonrpc: "2.0"
     }
     const signature = `${authSigner.address}:${await authSigner.signMessage(ethersId(JSON.stringify(body)))}`
