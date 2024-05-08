@@ -26,7 +26,7 @@ const networks = {
     } as const,
 }
 
-/** 
+/**
  * Gets the network preset matching the provided chainId,
  * throws an UnimplementedNetwork error if not found.
  */
