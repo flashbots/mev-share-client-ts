@@ -1,3 +1,4 @@
+import SupportedNetworks from './api/networks'
 import MevShareClient from './client'
 
 export {
@@ -11,6 +12,6 @@ export {
     EventHistoryEntry,
 } from "./api/interfaces"
 
-export {SupportedNetworks} from "./api/networks"
+export {SupportedNetworks}
 
 export default MevShareClient

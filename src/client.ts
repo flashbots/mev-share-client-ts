@@ -24,7 +24,7 @@ import {
     EventHistoryEntry
 } from './api/interfaces'
 import { mungeBundleParams, mungePrivateTxParams, mungeSimBundleOptions } from "./api/mungers"
-import { SupportedNetworks } from './api/networks'
+import SupportedNetworks from './api/networks'
 import { PendingBundle, PendingTransaction } from './api/events';
 import { URLSearchParams } from 'url';
 
@@ -45,14 +45,19 @@ export default class MevShareClient {
         return new MevShareClient(authSigner, SupportedNetworks.mainnet)
     }
 
-    /** Connect to Flashbots MEV-Share node on Goerli. */
-    static useEthereumGoerli(authSigner: Wallet): MevShareClient {
-        return new MevShareClient(authSigner, SupportedNetworks.goerli)
+    /** Connect to Flashbots MEV-Share node on Sepolia. */
+    static useEthereumSepolia(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.sepolia)
+    }
+
+    /** Connect to Flashbots MEV-Share node on Holesky. */
+    static useEthereumHolesky(authSigner: Wallet): MevShareClient {
+        return new MevShareClient(authSigner, SupportedNetworks.holesky)
     }
 
     /** Connect to supported networks by specifying a network with a `chainId`. */
     static fromNetwork(authSigner: Wallet, {chainId}: {chainId: number | bigint}): MevShareClient {
-        const chainNum = typeof chainId == "bigint" ? Number(chainId) : chainId
+        const chainNum = typeof chainId === "bigint" ? Number(chainId) : chainId
         const network = SupportedNetworks.getNetwork(chainNum)
         return new MevShareClient(authSigner, network)
     }
